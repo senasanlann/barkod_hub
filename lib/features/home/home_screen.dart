@@ -1,5 +1,12 @@
 import 'package:flutter/material.dart';
 
+import '../../core/routes/app_routes.dart';
+import '../../core/theme/app_spacing.dart';
+import 'widgets/home_header.dart';
+import 'widgets/manual_card.dart';
+import 'widgets/scanner_card.dart';
+import 'widgets/recent_section.dart';
+
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
 
@@ -7,32 +14,37 @@ class HomeScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Barkod Hub'),
+        title: const Text('Ana Sayfa'),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(20),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: [
-            const Text(
-              'Ürün sorgulamak için barkod okutabilir veya manuel barkod girebilirsin.',
-              style: TextStyle(
-                fontSize: 16,
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              const HomeHeader(),
+
+              const SizedBox(height: AppSpacing.xl),
+
+              ScannerCard(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.barcode);
+                },
               ),
-            ),
-            const SizedBox(height: 24),
-            ElevatedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.qr_code_scanner),
-              label: const Text('Barkod Tara'),
-            ),
-            const SizedBox(height: 12),
-            OutlinedButton.icon(
-              onPressed: () {},
-              icon: const Icon(Icons.keyboard),
-              label: const Text('Manuel Barkod Gir'),
-            ),
-          ],
+
+              const SizedBox(height: AppSpacing.md),
+
+              ManualCard(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.manualBarcode);
+                },
+              ),
+
+              const SizedBox(height: AppSpacing.md),
+
+              const RecentSection(),
+            ],
+          ),
         ),
       ),
     );

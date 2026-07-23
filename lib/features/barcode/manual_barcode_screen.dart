@@ -1,0 +1,141 @@
+import 'package:flutter/material.dart';
+
+import '../../core/di/service_locator.dart';
+import '../../core/network/api_exception.dart';
+import '../../core/theme/app_spacing.dart';
+import '../../core/utils/barcode_validator.dart';
+import '../../features/product/models/product_model.dart';
+import '../../shared/widgets/app_button.dart';
+import '../../shared/widgets/app_card.dart';
+import '../../shared/widgets/app_snack_bar.dart';
+import '../../shared/widgets/app_text_field.dart';
+import 'widgets/product_result_card.dart';
+
+class ManualBarcodeScreen extends StatefulWidget {
+  const ManualBarcodeScreen({super.key});
+
+  @override
+  State<ManualBarcodeScreen> createState() => _ManualBarcodeScreenState();
+}
+
+class _ManualBarcodeScreenState extends State<ManualBarcodeScreen> {
+  final TextEditingController _barcodeController = TextEditingController();
+  bool _isSubmitting = false;
+  ProductModel? _productResult;
+
+  @override
+  void dispose() {
+    _barcodeController.dispose();
+    super.dispose();
+  }
+
+  void _showSuccessMessage(String barcode) {
+    AppSnackBar.showSuccess(context, 'Barkod sorgusu tamamlandı: $barcode');
+  }
+
+  void _showErrorMessage(String message) {
+    AppSnackBar.showError(context, message);
+  }
+
+  Future<void> _submitBarcode() async {
+    if (_isSubmitting) return;
+
+    final barcode = _barcodeController.text.trim();
+
+    if (barcode.isEmpty) {
+      _showErrorMessage('Lütfen barkod numarası girin.');
+      return;
+    }
+
+    if (!BarcodeValidator.isValid(barcode)) {
+      _showErrorMessage(
+        'Barkod yalnızca rakamlardan oluşmalı ve 8 veya 13 hane olmalıdır.',
+      );
+      return;
+    }
+
+    setState(() {
+      _isSubmitting = true;
+      _productResult = null;
+    });
+
+    try {
+      final result = await ServiceLocator.apiService.getProductByBarcode(
+        barcode,
+      );
+      if (!mounted) return;
+      setState(() {
+        _productResult = result;
+      });
+      _showSuccessMessage(barcode);
+    } on ApiException catch (e) {
+      if (!mounted) return;
+
+      setState(() {
+        _productResult = null;
+      });
+
+      _showErrorMessage(e.message);
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isSubmitting = false;
+        });
+      }
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final productResult = _productResult;
+
+    return Scaffold(
+      appBar: AppBar(title: const Text('Manuel Barkod')),
+      body: SafeArea(
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text(
+                'Barkod Numarası',
+                style: Theme.of(context).textTheme.headlineLarge,
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              Text(
+                'Ürün barkodunu elle girerek sorgulama yapabilirsiniz.',
+                style: Theme.of(context).textTheme.bodyMedium,
+              ),
+              const SizedBox(height: AppSpacing.xl),
+              AppCard(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    AppTextField(
+                      controller: _barcodeController,
+                      labelText: 'Barkod',
+                      hintText: 'Örn: 8690123456789',
+                      keyboardType: TextInputType.number,
+                      prefixIcon: Icons.qr_code,
+                    ),
+                    const SizedBox(height: AppSpacing.lg),
+                    AppButton(
+                      text: 'Sorgula',
+                      icon: Icons.search,
+                      onPressed: _submitBarcode,
+                      isLoading: _isSubmitting,
+                    ),
+                  ],
+                ),
+              ),
+              if (productResult != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                ProductResultCard(product: productResult),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}

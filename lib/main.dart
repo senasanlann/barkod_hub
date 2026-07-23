@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 
 import 'core/theme/app_theme.dart';
-import 'features/home/home_screen.dart';
+import 'core/routes/app_router.dart';
+import 'core/routes/app_routes.dart';
 
 void main() {
   runApp(const BarkodHubApp());
@@ -16,7 +17,8 @@ class BarkodHubApp extends StatelessWidget {
       title: 'Barkod Hub',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      home: const HomeScreen(),
+      initialRoute: AppRoutes.home,
+      onGenerateRoute: AppRouter.generateRoute,
     );
   }
 }
