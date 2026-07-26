@@ -6,7 +6,13 @@ class ServiceLocator {
 
   static final ApiClient apiClient = ApiClient();
 
-  static final ApiService apiService = ApiService(
-    client: apiClient,
-  );
+  static final ApiService _apiService = ApiService(client: apiClient);
+
+  static ApiService? _apiServiceOverride;
+
+  static ApiService get apiService => _apiServiceOverride ?? _apiService;
+
+  static void setApiServiceOverride(ApiService? apiService) {
+    _apiServiceOverride = apiService;
+  }
 }

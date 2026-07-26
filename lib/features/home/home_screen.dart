@@ -6,6 +6,7 @@ import 'widgets/home_header.dart';
 import 'widgets/manual_card.dart';
 import 'widgets/scanner_card.dart';
 import 'widgets/recent_section.dart';
+import 'widgets/sector_section.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -42,6 +43,10 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: AppSpacing.md),
 
+              const SizedBox(height: AppSpacing.md),
+
+              const SectorSection(),
+              
               const RecentSection(),
             ],
           ),

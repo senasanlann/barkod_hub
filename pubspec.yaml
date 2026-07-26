@@ -36,6 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.8
   dio: ^5.7.0
   mobile_scanner: ^7.2.0
+  csv: ^8.0.0
   
 dev_dependencies:
   flutter_test:
@@ -58,6 +59,9 @@ flutter:
   # included with your application, so that you can use the icons in
   # the material Icons class.
   uses-material-design: true
+
+  assets:
+    - docs/barkod_listesi_mock.csv
 
   # To add assets to your application, add an assets section, like this:
   # assets:
