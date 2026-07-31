@@ -41,5 +41,25 @@ void main() {
       expect(list.itemCount, 350);
       expect(list.exportLinks['zip'], 'https://example.com/kirtasiye.zip');
     });
+
+    test('toJson round-trips through fromJson', () {
+      const list = BarcodeListModel(
+        id: 'l-1',
+        sectorId: 's-1',
+        title: 'Market Temel Liste',
+        version: '2026.07',
+        itemCount: 1200,
+        exportLinks: {'pdf': 'https://example.com/market.pdf'},
+      );
+
+      final restored = BarcodeListModel.fromJson(list.toJson());
+
+      expect(restored.id, list.id);
+      expect(restored.sectorId, list.sectorId);
+      expect(restored.title, list.title);
+      expect(restored.version, list.version);
+      expect(restored.itemCount, list.itemCount);
+      expect(restored.exportLinks, list.exportLinks);
+    });
   });
 }

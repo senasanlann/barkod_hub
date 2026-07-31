@@ -65,6 +65,40 @@ void main() {
     });
   });
 
+  group('ApiService.getExportJob', () {
+    test('extracts export job data from a wrapped response', () async {
+      final service = ApiService(
+        useMockData: false,
+        client: _FakeApiClient({
+          'success': true,
+          'data': {
+            'id': 'job-1',
+            'status': 'ready',
+            'links': {'pdf': 'https://example.com/job-1.pdf'},
+          },
+        }),
+      );
+
+      final result = await service.getExportJob('job-1');
+
+      expect(result['id'], 'job-1');
+      expect(result['status'], 'ready');
+      expect(result['links']['pdf'], 'https://example.com/job-1.pdf');
+    });
+
+    test('returns mock export links in mock data mode', () async {
+      final service = ApiService(client: _FakeApiClient(null));
+
+      final result = await service.getExportJob('job-2');
+      final links = result['links'] as Map<String, dynamic>;
+
+      expect(result['status'], 'ready');
+      expect(links['pdf'], 'https://example.com/export/job-2.pdf');
+      expect(links['excel'], 'https://example.com/export/job-2.xlsx');
+      expect(links['zip'], 'https://example.com/export/job-2.zip');
+    });
+  });
+
   group('ApiService mock data mode', () {
     test(
       'getSectors returns non-empty mock sectors without hitting the client',
@@ -90,11 +124,11 @@ void main() {
     test('finds a product by barcode from the bundled CSV', () async {
       final service = ApiService(client: _FakeApiClient(null));
 
-      final product = await service.getProductByBarcode('8690123456001');
+      final product = await service.getProductByBarcode('8695077102010');
 
-      expect(product.name, 'Tam Yagli Sut 1L');
-      expect(product.category, 'Sut Urunleri');
-      expect(product.price, 34.90);
+      expect(product.name, 'Dost Tam Yağlı Süt');
+      expect(product.category, 'Süt');
+      expect(product.price, isNull);
     });
   });
 }

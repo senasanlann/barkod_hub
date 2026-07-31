@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_spacing.dart';
+import '../../shared/widgets/app_button.dart';
 import 'widgets/home_header.dart';
 import 'widgets/manual_card.dart';
 import 'widgets/scanner_card.dart';
@@ -42,6 +43,15 @@ class HomeScreen extends StatelessWidget {
               ),
 
               const SizedBox(height: AppSpacing.md),
+
+              AppButton(
+                text: 'İndirilenler',
+                icon: Icons.download_outlined,
+                variant: AppButtonVariant.outline,
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.downloads);
+                },
+              ),
 
               const SizedBox(height: AppSpacing.md),
 

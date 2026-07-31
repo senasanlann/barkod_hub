@@ -4,6 +4,7 @@ import '../../core/di/service_locator.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/barcode_validator.dart';
+import '../../features/history/models/scan_history_model.dart';
 import '../../features/product/models/product_model.dart';
 import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/app_card.dart';
@@ -67,15 +68,64 @@ class _ManualBarcodeScreenState extends State<ManualBarcodeScreen> {
       setState(() {
         _productResult = result;
       });
+
+      final found = result.name != null;
+      await ServiceLocator.offlineCacheService.cacheProduct(result);
+      await ServiceLocator.offlineCacheService.addScanHistory(
+        ScanHistoryModel(
+          barcode: barcode,
+          productName: result.name,
+          imageUrl: result.imageUrl,
+          scannedAt: DateTime.now().toIso8601String(),
+          status: found ? 'success' : 'not_found',
+        ),
+      );
+
+      if (!mounted) return;
       _showSuccessMessage(barcode);
     } on ApiException catch (e) {
+      final cached = await ServiceLocator.offlineCacheService
+          .getCachedProduct(barcode);
       if (!mounted) return;
 
-      setState(() {
-        _productResult = null;
-      });
+      if (cached != null) {
+        setState(() {
+          _productResult = cached.product;
+        });
 
-      _showErrorMessage(e.message);
+        await ServiceLocator.offlineCacheService.addScanHistory(
+          ScanHistoryModel(
+            barcode: barcode,
+            productName: cached.product.name,
+            imageUrl: cached.product.imageUrl,
+            scannedAt: DateTime.now().toIso8601String(),
+            status: 'offline_cache',
+          ),
+        );
+
+        if (!mounted) return;
+        AppSnackBar.showSuccess(
+          context,
+          'Çevrimdışı: önbellekten gösteriliyor.',
+        );
+      } else {
+        setState(() {
+          _productResult = null;
+        });
+
+        await ServiceLocator.offlineCacheService.addScanHistory(
+          ScanHistoryModel(
+            barcode: barcode,
+            productName: null,
+            imageUrl: null,
+            scannedAt: DateTime.now().toIso8601String(),
+            status: 'error',
+          ),
+        );
+
+        if (!mounted) return;
+        _showErrorMessage(e.message);
+      }
     } finally {
       if (mounted) {
         setState(() {

@@ -10,4 +10,6 @@ class ApiConstants {
   static const String sectors = '/api/v1/sectors';
 
   static const String listItems = '/api/v1/lists';
+
+  static const String exportJobs = '/api/v1/export/jobs';
 }

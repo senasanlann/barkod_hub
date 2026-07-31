@@ -67,4 +67,15 @@ class BarcodeListModel {
 
     return {};
   }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'sectorId': sectorId,
+      'title': title,
+      'version': version,
+      'itemCount': itemCount,
+      'exportLinks': exportLinks,
+    };
+  }
 }

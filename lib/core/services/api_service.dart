@@ -110,6 +110,25 @@ class ApiService {
     throw Exception('Liste ürünleri beklenen formatta gelmedi.');
   }
 
+  Future<Map<String, dynamic>> getExportJob(String jobId) async {
+    if (useMockData) {
+      return _getMockExportJob(jobId);
+    }
+
+    final response = await client.get('${ApiConstants.exportJobs}/$jobId');
+    final data = _extractData(response);
+
+    if (data is Map<String, dynamic>) {
+      return data;
+    }
+
+    if (data is Map) {
+      return Map<String, dynamic>.from(data);
+    }
+
+    throw Exception('Export bilgisi beklenen formatta gelmedi.');
+  }
+
   List<ProductModel> _parseItems(dynamic itemsData) {
     if (itemsData is! List) return const [];
 
@@ -195,6 +214,18 @@ class ApiService {
       'barcode': barcode,
       'status': 'CSV dosyasında ürün bulunamadı',
     });
+  }
+
+  Future<Map<String, dynamic>> _getMockExportJob(String jobId) async {
+    return {
+      'id': jobId,
+      'status': 'ready',
+      'links': {
+        'pdf': 'https://example.com/export/$jobId.pdf',
+        'excel': 'https://example.com/export/$jobId.xlsx',
+        'zip': 'https://example.com/export/$jobId.zip',
+      },
+    };
   }
 
   Future<List<Map<String, dynamic>>> _loadCsvProducts() {

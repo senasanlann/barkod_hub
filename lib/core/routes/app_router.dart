@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 
 import '../../features/barcode/barcode_screen.dart';
 import '../../features/barcode/manual_barcode_screen.dart';
+import '../../features/downloads/downloads_screen.dart';
+import '../../features/history/history_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/sectors/models/sector_model.dart';
 import '../../features/sectors/sector_detail_screen.dart';
@@ -18,6 +20,12 @@ class AppRouter {
 
       case AppRoutes.manualBarcode:
         return MaterialPageRoute(builder: (_) => const ManualBarcodeScreen());
+
+      case AppRoutes.downloads:
+        return MaterialPageRoute(builder: (_) => const DownloadsScreen());
+
+      case AppRoutes.history:
+        return MaterialPageRoute(builder: (_) => const HistoryScreen());
 
       case AppRoutes.sectorDetail:
         final sector = settings.arguments;

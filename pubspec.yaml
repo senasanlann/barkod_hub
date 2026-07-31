@@ -37,7 +37,14 @@ dependencies:
   dio: ^5.7.0
   mobile_scanner: ^7.2.0
   csv: ^8.0.0
-  
+  path_provider: ^2.1.5
+  open_filex: ^4.7.0
+  shared_preferences: ^2.3.3
+  pdf: ^3.11.1
+  excel: ^4.0.6
+  archive: ^3.6.1
+  share_plus: ^10.1.3
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -62,6 +69,8 @@ flutter:
 
   assets:
     - docs/barkod_listesi_mock.csv
+    - assets/fonts/NotoSans-Regular.ttf
+    - assets/fonts/NotoSans-Bold.ttf
 
   # To add assets to your application, add an assets section, like this:
   # assets:
