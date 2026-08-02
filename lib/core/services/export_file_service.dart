@@ -26,8 +26,10 @@ class ZipBuildResult {
 }
 
 class ExportFileService {
-  ExportFileService({required Dio dio, Future<List<int>> Function(String url)? imageFetcher})
-    : _imageFetcher = imageFetcher ?? _defaultImageFetcher(dio);
+  ExportFileService({
+    required Dio dio,
+    Future<List<int>> Function(String url)? imageFetcher,
+  }) : _imageFetcher = imageFetcher ?? _defaultImageFetcher(dio);
 
   final Future<List<int>> Function(String url) _imageFetcher;
 
@@ -75,6 +77,7 @@ class ExportFileService {
     document.addPage(
       pw.MultiPage(
         pageFormat: PdfPageFormat.a4,
+        maxPages: 1000,
         build: (context) => [
           pw.Header(
             level: 0,
@@ -184,7 +187,8 @@ class ExportFileService {
   }
 
   String _safeFileName(ProductModel product) {
-    final base = product.barcode ?? product.name ?? product.imageUrl.hashCode.toString();
+    final base =
+        product.barcode ?? product.name ?? product.imageUrl.hashCode.toString();
     return base.replaceAll(RegExp(r'[^A-Za-z0-9_-]'), '_');
   }
 

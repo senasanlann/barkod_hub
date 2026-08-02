@@ -1,0 +1,11 @@
+{
+    "schema_version": 2,
+    "commit": "fc675f8f3f615f13d4ef9b5cb01103e7a085c334",
+    "indexed_at": "2026-07-31T13:39:33Z",
+    "project": "barkod_hub",
+    "nodes": 620,
+    "edges": 1589,
+    "original_size": 1572864,
+    "compressed_size": 83276,
+    "compression_level": 9
+}

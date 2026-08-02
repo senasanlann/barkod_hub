@@ -41,24 +41,49 @@ void main() {
       expect(bytes, isNotEmpty);
       expect(utf8.decode(bytes.sublist(0, 5), allowMalformed: true), '%PDF-');
     });
+
+    test('produces PDF bytes for long filtered lists', () async {
+      final service = ExportFileService(dio: ApiClient().dio);
+      final longList = List.generate(
+        400,
+        (index) => ProductModel.fromJson({
+          'barcode': '869000000$index',
+          'name': 'Filtreli Ürün $index',
+          'brand': 'Marka',
+          'category': 'Dondurma',
+          'price': '10.5',
+        }),
+      );
+
+      final bytes = await service.buildPdf(
+        title: 'Uzun Test Listesi',
+        products: longList,
+      );
+
+      expect(bytes, isNotEmpty);
+      expect(utf8.decode(bytes.sublist(0, 5), allowMalformed: true), '%PDF-');
+    });
   });
 
   group('ExportFileService.buildExcel', () {
-    test('produces a readable xlsx with a header row and product rows', () async {
-      final service = ExportFileService(dio: ApiClient().dio);
+    test(
+      'produces a readable xlsx with a header row and product rows',
+      () async {
+        final service = ExportFileService(dio: ApiClient().dio);
 
-      final bytes = await service.buildExcel(
-        title: 'Test Listesi',
-        products: products,
-      );
+        final bytes = await service.buildExcel(
+          title: 'Test Listesi',
+          products: products,
+        );
 
-      final decoded = excel_lib.Excel.decodeBytes(bytes);
-      final sheet = decoded.tables[decoded.tables.keys.first]!;
+        final decoded = excel_lib.Excel.decodeBytes(bytes);
+        final sheet = decoded.tables[decoded.tables.keys.first]!;
 
-      expect(sheet.maxRows, 3); // header + 2 products
-      expect(sheet.rows[1][0]?.value.toString(), 'Ürün A');
-      expect(sheet.rows[2][0]?.value.toString(), 'Ürün B');
-    });
+        expect(sheet.maxRows, 3); // header + 2 products
+        expect(sheet.rows[1][0]?.value.toString(), 'Ürün A');
+        expect(sheet.rows[2][0]?.value.toString(), 'Ürün B');
+      },
+    );
   });
 
   group('ExportFileService.buildImagesZip', () {
@@ -78,23 +103,26 @@ void main() {
       expect(archive.files, hasLength(2));
     });
 
-    test('skips images that fail to fetch without failing the whole zip', () async {
-      final service = ExportFileService(
-        dio: ApiClient().dio,
-        imageFetcher: (url) async {
-          if (url.contains('a.jpg')) {
-            throw Exception('network error');
-          }
-          return utf8.encode('fake-image-bytes-$url');
-        },
-      );
+    test(
+      'skips images that fail to fetch without failing the whole zip',
+      () async {
+        final service = ExportFileService(
+          dio: ApiClient().dio,
+          imageFetcher: (url) async {
+            if (url.contains('a.jpg')) {
+              throw Exception('network error');
+            }
+            return utf8.encode('fake-image-bytes-$url');
+          },
+        );
 
-      final result = await service.buildImagesZip(products: products);
+        final result = await service.buildImagesZip(products: products);
 
-      expect(result.totalImages, 2);
-      expect(result.includedImages, 1);
-      expect(result.hasFailures, isTrue);
-    });
+        expect(result.totalImages, 2);
+        expect(result.includedImages, 1);
+        expect(result.hasFailures, isTrue);
+      },
+    );
 
     test('retry only re-fetches previously failed images', () async {
       var callCount = 0;

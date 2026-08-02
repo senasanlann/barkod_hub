@@ -45,7 +45,6 @@ class OfflineCacheService {
   static const String _productCachePrefix = 'cache_product_';
   static const String _sectorListCachePrefix = 'cache_sector_list_';
 
-  // --- Ürün detay cache ---
 
   Future<void> cacheProduct(ProductModel product) async {
     final barcode = product.barcode;
@@ -80,8 +79,6 @@ class OfflineCacheService {
       return null;
     }
   }
-
-  // --- Sektör liste cache ---
 
   Future<void> cacheSectorList(
     String sectorId,

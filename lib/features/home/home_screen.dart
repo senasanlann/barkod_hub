@@ -15,9 +15,7 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Ana Sayfa'),
-      ),
+      appBar: AppBar(title: const Text('Ana Sayfa')),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -55,8 +53,21 @@ class HomeScreen extends StatelessWidget {
 
               const SizedBox(height: AppSpacing.md),
 
+              AppButton(
+                text: 'Geçmiş',
+                icon: Icons.history,
+                variant: AppButtonVariant.outline,
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.history);
+                },
+              ),
+
+              const SizedBox(height: AppSpacing.md),
+
               const SectorSection(),
-              
+
+              const SizedBox(height: AppSpacing.md),
+
               const RecentSection(),
             ],
           ),

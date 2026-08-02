@@ -84,8 +84,9 @@ class _ManualBarcodeScreenState extends State<ManualBarcodeScreen> {
       if (!mounted) return;
       _showSuccessMessage(barcode);
     } on ApiException catch (e) {
-      final cached = await ServiceLocator.offlineCacheService
-          .getCachedProduct(barcode);
+      final cached = await ServiceLocator.offlineCacheService.getCachedProduct(
+        barcode,
+      );
       if (!mounted) return;
 
       if (cached != null) {

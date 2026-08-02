@@ -115,8 +115,8 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
         content: Text('${file.fileName} indirildi.'),
         action: SnackBarAction(
           label: 'Aç',
-          onPressed: () => ServiceLocator.fileDownloadService
-              .openDownloadedFile(file.path),
+          onPressed: () =>
+              ServiceLocator.fileDownloadService.openDownloadedFile(file.path),
         ),
       ),
     );
@@ -428,9 +428,13 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
                                         size: 16,
                                       ),
                                 label: Text(format.toUpperCase()),
-                                onPressed: isDownloading
+                                onPressed:
+                                    isDownloading || filteredProducts.isEmpty
                                     ? null
-                                    : () => _handleDownload(format, products),
+                                    : () => _handleDownload(
+                                        format,
+                                        filteredProducts,
+                                      ),
                               );
                             }).toList(),
                           ),

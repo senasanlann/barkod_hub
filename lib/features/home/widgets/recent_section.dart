@@ -49,9 +49,7 @@ class _RecentSectionState extends State<RecentSection> {
           FutureBuilder<List<ScanHistoryModel>>(
             future: _historyFuture,
             builder: (context, snapshot) {
-              final history = (snapshot.data ?? const [])
-                  .take(3)
-                  .toList();
+              final history = (snapshot.data ?? const []).take(3).toList();
 
               if (history.isEmpty) {
                 return Row(
@@ -96,9 +94,7 @@ class _RecentSectionState extends State<RecentSection> {
                                   ),
                                   Text(
                                     entry.barcode,
-                                    style: Theme.of(context)
-                                        .textTheme
-                                        .bodySmall
+                                    style: Theme.of(context).textTheme.bodySmall
                                         ?.copyWith(
                                           color: AppColors.secondaryText,
                                         ),
