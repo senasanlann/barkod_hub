@@ -42,6 +42,15 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
       return;
     }
 
+    final canQuery = await ServiceLocator.authService.canPerformGuestQuery();
+    if (!canQuery) {
+      if (!mounted) return;
+      _showLimitExceededDialog();
+      return;
+    }
+
+    await ServiceLocator.authService.incrementGuestQueryCount();
+
     setState(() {
       _isProcessing = true;
       _productResult = null;
@@ -164,6 +173,33 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
 
   void _showErrorMessage(String message) {
     AppSnackBar.showError(context, message);
+  }
+
+  void _showLimitExceededDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Günlük Misafir Limiti Doldu'),
+          content: const Text(
+            'Misafir kullanıcı olarak günlük 10 barkod sorgulama hakkınızı doldurdunuz. Sınırsız sorgulama yapmak için lütfen giriş yapın.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pushNamed(context, AppRoutes.login);
+              },
+              child: const Text('Giriş Yap'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   @override

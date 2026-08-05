@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../core/di/service_locator.dart';
 import '../../core/network/api_exception.dart';
+import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/barcode_validator.dart';
 import '../../features/history/models/scan_history_model.dart';
@@ -38,6 +39,33 @@ class _ManualBarcodeScreenState extends State<ManualBarcodeScreen> {
     AppSnackBar.showError(context, message);
   }
 
+  void _showLimitExceededDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return AlertDialog(
+          title: const Text('Günlük Misafir Limiti Doldu'),
+          content: const Text(
+            'Misafir kullanıcı olarak günlük 10 barkod sorgulama hakkınızı doldurdunuz. Sınırsız sorgulama yapmak için lütfen giriş yapın.',
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(dialogContext),
+              child: const Text('İptal'),
+            ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(dialogContext);
+                Navigator.pushNamed(context, AppRoutes.login);
+              },
+              child: const Text('Giriş Yap'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Future<void> _submitBarcode() async {
     if (_isSubmitting) return;
 
@@ -54,6 +82,15 @@ class _ManualBarcodeScreenState extends State<ManualBarcodeScreen> {
       );
       return;
     }
+
+    final canQuery = await ServiceLocator.authService.canPerformGuestQuery();
+    if (!canQuery) {
+      if (!mounted) return;
+      _showLimitExceededDialog();
+      return;
+    }
+
+    await ServiceLocator.authService.incrementGuestQueryCount();
 
     setState(() {
       _isSubmitting = true;

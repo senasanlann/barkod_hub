@@ -64,6 +64,21 @@ class ProductModel {
     );
   }
 
+  Map<String, dynamic> toJson() {
+    return {
+      ...rawData,
+      if (id != null) 'id': id,
+      if (barcode != null) 'barcode': barcode,
+      if (name != null) 'name': name,
+      if (brand != null) 'brand': brand,
+      if (sector != null) 'sector': sector,
+      if (category != null) 'category': category,
+      if (price != null) 'price': price,
+      if (imageUrl != null) 'imageUrl': imageUrl,
+      if (updatedAt != null) 'updatedAt': updatedAt,
+    };
+  }
+
   static String? _readFirst(Map<String, dynamic> json, List<String> keys) {
     for (final key in keys) {
       final value = json[key];

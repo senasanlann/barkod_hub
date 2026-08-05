@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
 
+import '../../features/auth/login_screen.dart';
 import '../../features/barcode/barcode_screen.dart';
 import '../../features/barcode/manual_barcode_screen.dart';
 import '../../features/downloads/downloads_screen.dart';
+import '../../features/favorites/favorites_screen.dart';
 import '../../features/history/history_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/sectors/models/sector_model.dart';
@@ -16,6 +18,12 @@ class AppRouter {
     switch (settings.name) {
       case AppRoutes.home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
+
+      case AppRoutes.login:
+        return MaterialPageRoute(builder: (_) => const LoginScreen());
+
+      case AppRoutes.favorites:
+        return MaterialPageRoute(builder: (_) => const FavoritesScreen());
 
       case AppRoutes.barcode:
         return MaterialPageRoute(builder: (_) => const BarcodeScreen());

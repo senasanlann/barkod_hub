@@ -7,4 +7,6 @@ class AppRoutes {
   static const String history = '/history';
   static const String productNotFound = '/product-not-found';
   static const String suggestionForm = '/suggestion-form';
+  static const String login = '/login';
+  static const String favorites = '/favorites';
 }
