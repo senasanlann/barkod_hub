@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 
 import '../../features/auth/login_screen.dart';
+import '../../features/admin/admin_log_screen.dart';
+import '../../features/admin/admin_reports_screen.dart';
 import '../../features/barcode/barcode_screen.dart';
 import '../../features/barcode/manual_barcode_screen.dart';
 import '../../features/downloads/downloads_screen.dart';
@@ -24,6 +26,12 @@ class AppRouter {
 
       case AppRoutes.favorites:
         return MaterialPageRoute(builder: (_) => const FavoritesScreen());
+
+      case AppRoutes.adminLogs:
+        return MaterialPageRoute(builder: (_) => const AdminLogScreen());
+
+      case AppRoutes.adminReports:
+        return MaterialPageRoute(builder: (_) => const AdminReportsScreen());
 
       case AppRoutes.barcode:
         return MaterialPageRoute(builder: (_) => const BarcodeScreen());

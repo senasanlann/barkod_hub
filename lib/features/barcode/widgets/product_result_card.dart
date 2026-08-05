@@ -417,7 +417,7 @@ class _ProductResultCardState extends State<ProductResultCard> {
                   );
                 }
 
-                if (context.mounted) {
+                if (mounted) {
                   AppSnackBar.showSuccess(
                     context,
                     'Bildiriminiz alındı, teşekkür ederiz.',

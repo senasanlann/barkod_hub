@@ -22,11 +22,22 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   int _pendingCount = 0;
+  UserModel _currentUser = UserModel.guest();
 
   @override
   void initState() {
     super.initState();
+    _loadUser();
     _syncPendingQueue();
+  }
+
+  Future<void> _loadUser() async {
+    final user = await ServiceLocator.authService.getCurrentUser();
+    if (mounted) {
+      setState(() {
+        _currentUser = user;
+      });
+    }
   }
 
   Future<void> _syncPendingQueue() async {
@@ -60,7 +71,8 @@ class _HomeScreenState extends State<HomeScreen> {
     if (!mounted) return;
 
     if (currentUser.isRegistered) {
-      Navigator.pushNamed(context, route);
+      await Navigator.pushNamed(context, route);
+      await _loadUser();
       return;
     }
 
@@ -78,11 +90,66 @@ class _HomeScreenState extends State<HomeScreen> {
               child: const Text('İptal'),
             ),
             ElevatedButton(
-              onPressed: () {
+              onPressed: () async {
                 Navigator.pop(dialogContext);
-                Navigator.pushNamed(context, AppRoutes.login);
+                await Navigator.pushNamed(context, AppRoutes.login);
+                await _loadUser();
               },
               child: const Text('Giriş Yap'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showRoleSwitcherDialog() {
+    showDialog(
+      context: context,
+      builder: (dialogContext) {
+        return SimpleDialog(
+          title: const Text('Hızlı Rol Değiştir'),
+          children: [
+            SimpleDialogOption(
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+                await ServiceLocator.authService.logout();
+                await _loadUser();
+              },
+              child: const Text('Misafir (Guest)'),
+            ),
+            SimpleDialogOption(
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+                await ServiceLocator.authService.login(
+                  'user@bilsoft.com',
+                  '123',
+                );
+                await _loadUser();
+              },
+              child: const Text('Kayıtlı Kullanıcı (User)'),
+            ),
+            SimpleDialogOption(
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+                await ServiceLocator.authService.login(
+                  'editor@bilsoft.com',
+                  '123',
+                );
+                await _loadUser();
+              },
+              child: const Text('Editör (Editor)'),
+            ),
+            SimpleDialogOption(
+              onPressed: () async {
+                Navigator.pop(dialogContext);
+                await ServiceLocator.authService.login(
+                  'admin@bilsoft.com',
+                  '123',
+                );
+                await _loadUser();
+              },
+              child: const Text('Yönetici (Admin)'),
             ),
           ],
         );
@@ -103,35 +170,45 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Row(
         children: [
-          Icon(
-            user.isRegistered ? Icons.account_circle : Icons.person_outline,
-            color: user.isRegistered ? AppColors.primary : AppColors.secondaryText,
+          IconButton(
+            icon: Icon(
+              user.isRegistered ? Icons.account_circle : Icons.person_outline,
+              color: user.isRegistered
+                  ? AppColors.primary
+                  : AppColors.secondaryText,
+            ),
+            onPressed: _showRoleSwitcherDialog,
+            tooltip: 'Rol Değiştir',
           ),
-          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  user.isRegistered ? user.name : 'Misafir Modu',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                Text(
-                  user.role.displayName,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.secondaryText,
-                      ),
-                ),
-              ],
+            child: InkWell(
+              onTap: _showRoleSwitcherDialog,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    user.isRegistered ? user.name : 'Misafir Modu',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  Text(
+                    '${user.role.displayName} (Tıkla Değiştir)',
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.primary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
+                ],
+              ),
             ),
           ),
           TextButton(
             onPressed: () async {
               if (user.isRegistered) {
                 await ServiceLocator.authService.logout();
-                if (mounted) setState(() {});
+                await _loadUser();
               } else {
-                Navigator.pushNamed(context, AppRoutes.login);
+                await Navigator.pushNamed(context, AppRoutes.login);
+                await _loadUser();
               }
             },
             child: Text(user.isRegistered ? 'Çıkış Yap' : 'Giriş Yap'),
@@ -143,126 +220,141 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final user = _currentUser;
+
     return Scaffold(
       appBar: AppBar(title: const Text('Ana Sayfa')),
       body: SafeArea(
-        child: FutureBuilder<UserModel>(
-          future: ServiceLocator.authService.getCurrentUser(),
-          builder: (context, snapshot) {
-            final user = snapshot.data ?? UserModel.guest();
-
-            return SingleChildScrollView(
-              padding: const EdgeInsets.all(AppSpacing.lg),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _buildUserHeader(user),
-                  const SizedBox(height: AppSpacing.md),
-                  const HomeHeader(),
-                  if (_pendingCount > 0) ...[
-                    const SizedBox(height: AppSpacing.md),
-                    Container(
-                      padding: const EdgeInsets.all(AppSpacing.md),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: AppRadius.radiusMd,
-                        border: Border.all(
-                          color: AppColors.primary.withValues(alpha: 0.3),
+        child: SingleChildScrollView(
+          padding: const EdgeInsets.all(AppSpacing.lg),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              _buildUserHeader(user),
+              const SizedBox(height: AppSpacing.md),
+              const HomeHeader(),
+              if (_pendingCount > 0) ...[
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withValues(alpha: 0.1),
+                    borderRadius: AppRadius.radiusMd,
+                    border: Border.all(
+                      color: AppColors.primary.withValues(alpha: 0.3),
+                    ),
+                  ),
+                  child: Row(
+                    children: [
+                      const Icon(
+                        Icons.cloud_upload_outlined,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: AppSpacing.sm),
+                      Expanded(
+                        child: Text(
+                          '$_pendingCount öneri gönderilmeyi bekliyor',
+                          style: Theme.of(context)
+                              .textTheme
+                              .bodyMedium
+                              ?.copyWith(
+                                color: AppColors.primary,
+                                fontWeight: FontWeight.w600,
+                              ),
                         ),
                       ),
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.cloud_upload_outlined,
-                            color: AppColors.primary,
-                          ),
-                          const SizedBox(width: AppSpacing.sm),
-                          Expanded(
-                            child: Text(
-                              '$_pendingCount öneri gönderilmeyi bekliyor',
-                              style: Theme.of(context)
-                                  .textTheme
-                                  .bodyMedium
-                                  ?.copyWith(
-                                    color: AppColors.primary,
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-
-                  const SizedBox(height: AppSpacing.xl),
-
-                  ScannerCard(
-                    onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.barcode);
-                    },
+                    ],
                   ),
+                ),
+              ],
 
-                  const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.xl),
 
-                  ManualCard(
-                    onPressed: () {
-                      Navigator.pushNamed(context, AppRoutes.manualBarcode);
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  AppButton(
-                    text: 'Favorilerim',
-                    icon: Icons.favorite_outline,
-                    variant: AppButtonVariant.outline,
-                    onPressed: () {
-                      _checkPermissionAndNavigate(
-                        AppRoutes.favorites,
-                        'Favorilerim',
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  AppButton(
-                    text: 'İndirilenler',
-                    icon: Icons.download_outlined,
-                    variant: AppButtonVariant.outline,
-                    onPressed: () {
-                      _checkPermissionAndNavigate(
-                        AppRoutes.downloads,
-                        'İndirilenler',
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  AppButton(
-                    text: 'Geçmiş',
-                    icon: Icons.history,
-                    variant: AppButtonVariant.outline,
-                    onPressed: () {
-                      _checkPermissionAndNavigate(
-                        AppRoutes.history,
-                        'Geçmiş',
-                      );
-                    },
-                  ),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  const SectorSection(),
-
-                  const SizedBox(height: AppSpacing.md),
-
-                  const RecentSection(),
-                ],
+              ScannerCard(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.barcode);
+                },
               ),
-            );
-          },
+
+              const SizedBox(height: AppSpacing.md),
+
+              ManualCard(
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.manualBarcode);
+                },
+              ),
+
+              const SizedBox(height: AppSpacing.md),
+
+              AppButton(
+                text: 'Favorilerim',
+                icon: Icons.favorite_outline,
+                variant: AppButtonVariant.outline,
+                onPressed: () {
+                  _checkPermissionAndNavigate(
+                    AppRoutes.favorites,
+                    'Favorilerim',
+                  );
+                },
+              ),
+
+              const SizedBox(height: AppSpacing.md),
+
+              AppButton(
+                text: 'İndirilenler',
+                icon: Icons.download_outlined,
+                variant: AppButtonVariant.outline,
+                onPressed: () {
+                  _checkPermissionAndNavigate(
+                    AppRoutes.downloads,
+                    'İndirilenler',
+                  );
+                },
+              ),
+
+              const SizedBox(height: AppSpacing.md),
+
+              AppButton(
+                text: 'Geçmiş',
+                icon: Icons.history,
+                variant: AppButtonVariant.outline,
+                onPressed: () {
+                  _checkPermissionAndNavigate(
+                    AppRoutes.history,
+                    'Geçmiş',
+                  );
+                },
+              ),
+
+              if (user.role == UserRole.admin) ...[
+                const SizedBox(height: AppSpacing.md),
+                AppButton(
+                  text: 'Yönetim Özeti & Loglar',
+                  icon: Icons.admin_panel_settings_outlined,
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.adminLogs);
+                  },
+                ),
+                const SizedBox(height: AppSpacing.sm),
+                AppButton(
+                  text: 'Veri Kontrolü & Bildirimler',
+                  icon: Icons.assignment_turned_in_outlined,
+                  variant: AppButtonVariant.outline,
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.adminReports);
+                  },
+                ),
+              ],
+
+              const SizedBox(height: AppSpacing.md),
+
+              const SectorSection(),
+
+              const SizedBox(height: AppSpacing.md),
+
+              const RecentSection(),
+            ],
+          ),
         ),
       ),
     );

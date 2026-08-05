@@ -86,7 +86,7 @@ class _FavoritesScreenState extends State<FavoritesScreen> {
                 : ListView.separated(
                     padding: const EdgeInsets.all(AppSpacing.lg),
                     itemCount: _favorites.length,
-                    separatorBuilder: (_, __) =>
+                    separatorBuilder: (_, _) =>
                         const SizedBox(height: AppSpacing.md),
                     itemBuilder: (context, index) {
                       final item = _favorites[index];

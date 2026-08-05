@@ -39,11 +39,17 @@ class AuthService {
       return false;
     }
 
+    final role = trimmedEmail.toLowerCase().contains('admin')
+        ? UserRole.admin
+        : trimmedEmail.toLowerCase().contains('editor')
+            ? UserRole.editor
+            : UserRole.user;
+
     final user = UserModel(
       id: 'usr_${DateTime.now().millisecondsSinceEpoch}',
       email: trimmedEmail,
       name: trimmedEmail.split('@').first,
-      role: UserRole.user,
+      role: role,
       token: 'jwt_token_${DateTime.now().millisecondsSinceEpoch}',
     );
 

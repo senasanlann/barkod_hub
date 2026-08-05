@@ -9,4 +9,6 @@ class AppRoutes {
   static const String suggestionForm = '/suggestion-form';
   static const String login = '/login';
   static const String favorites = '/favorites';
+  static const String adminLogs = '/admin-logs';
+  static const String adminReports = '/admin-reports';
 }
