@@ -7,6 +7,8 @@ import '../../features/history/history_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/sectors/models/sector_model.dart';
 import '../../features/sectors/sector_detail_screen.dart';
+import '../../features/suggestion/product_not_found_screen.dart';
+import '../../features/suggestion/suggestion_form_screen.dart';
 import 'app_routes.dart';
 
 class AppRouter {
@@ -26,6 +28,18 @@ class AppRouter {
 
       case AppRoutes.history:
         return MaterialPageRoute(builder: (_) => const HistoryScreen());
+
+      case AppRoutes.productNotFound:
+        final barcode = settings.arguments as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => ProductNotFoundScreen(barcode: barcode),
+        );
+
+      case AppRoutes.suggestionForm:
+        final barcode = settings.arguments as String? ?? '';
+        return MaterialPageRoute(
+          builder: (_) => SuggestionFormScreen(barcode: barcode),
+        );
 
       case AppRoutes.sectorDetail:
         final sector = settings.arguments;

@@ -6,6 +6,7 @@ import 'package:flutter/services.dart';
 import '../../features/product/models/product_model.dart';
 import '../../features/sectors/models/barcode_list_model.dart';
 import '../../features/sectors/models/sector_model.dart';
+import '../../features/suggestion/models/suggestion_model.dart';
 import '../network/api_client.dart';
 import '../network/api_constants.dart';
 
@@ -16,6 +17,37 @@ class ApiService {
 
   ApiService({required this.client, bool? useMockData})
     : useMockData = useMockData ?? ApiConstants.useMockData;
+
+  Future<bool> postProductSuggestion(SuggestionModel suggestion) async {
+    if (useMockData) {
+      await Future.delayed(const Duration(milliseconds: 300));
+      return true;
+    }
+
+    try {
+      await client.post(
+        ApiConstants.productSuggestions,
+        data: suggestion.toJson(),
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
+  Future<bool> postImageReport(SuggestionModel report) async {
+    if (useMockData) {
+      await Future.delayed(const Duration(milliseconds: 300));
+      return true;
+    }
+
+    try {
+      await client.post(ApiConstants.imageReports, data: report.toJson());
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
 
   Future<dynamic> get(String path, {Map<String, dynamic>? queryParameters}) {
     return client.get(path, queryParameters: queryParameters);
@@ -30,33 +62,90 @@ class ApiService {
   }
 
   Future<ProductModel> getProductByBarcode(String barcode) async {
+    // 1. Önce CSV'de ara (hızlı, offline çalışır)
+    final csvProducts = await _loadCsvProducts();
+    for (final product in csvProducts) {
+      if (product['barcode']?.toString().trim() == barcode) {
+        final model = ProductModel.fromJson(product);
+        if (model.name != null && model.name!.trim().isNotEmpty) {
+          return model;
+        }
+      }
+    }
+
     if (useMockData) {
-      return _getMockProductByBarcode(barcode);
+      return ProductModel.fromJson({
+        'barcode': barcode,
+        'status': 'CSV dosyasında ürün bulunamadı',
+      });
     }
 
-    final response = await client.get(
-      ApiConstants.productsByBarcode,
-      queryParameters: {'barcode': barcode},
-    );
+    // 2. CSV'de bulunamazsa OFF'a git (Open Food Facts API)
+    try {
+      final offUrl =
+          '${ApiConstants.offBaseUrl}${ApiConstants.offProductPath}/$barcode.json';
+      final response = await client.get(
+        offUrl,
+        queryParameters: {
+          'fields': 'code,product_name,brands,categories,image_url,quantity',
+        },
+      );
 
-    if (response is Map<String, dynamic>) {
-      return ProductModel.fromJson(response);
+      if (response is Map) {
+        final map = Map<String, dynamic>.from(response);
+        final status = map['status'];
+
+        if (status == 0 || status == '0') {
+          return ProductModel.fromJson({
+            'barcode': barcode,
+            'status': 'Ürün bulunamadı',
+          });
+        }
+
+        if (map['product'] is Map) {
+          final productMap = Map<String, dynamic>.from(map['product'] as Map);
+
+          final rawCategories = productMap['categories']?.toString().trim();
+          String? category;
+          if (rawCategories != null && rawCategories.isNotEmpty) {
+            category = rawCategories.split(',').first.trim();
+          }
+
+          final mappedProduct = <String, dynamic>{
+            ...productMap,
+            'barcode': productMap['code']?.toString() ?? barcode,
+            'name': productMap['product_name']?.toString(),
+            'brand': productMap['brands']?.toString(),
+            'category': category ?? productMap['categories']?.toString(),
+            'imageUrl': productMap['image_url']?.toString(),
+            'source': 'OpenFoodFacts',
+          };
+
+          final product = ProductModel.fromJson(mappedProduct);
+          if (product.name != null && product.name!.trim().isNotEmpty) {
+            return product;
+          }
+        }
+      }
+    } catch (_) {
+      // Ağ hatasında exception fırlatmak yerine "Ürün bulunamadı" durumuna düş
     }
 
-    if (response is Map) {
-      return ProductModel.fromJson(Map<String, dynamic>.from(response));
-    }
-
-    return ProductModel(rawData: {'response': response});
+    return ProductModel.fromJson({
+      'barcode': barcode,
+      'status': 'Ürün bulunamadı',
+    });
   }
 
   Future<List<SectorModel>> getSectors() async {
-    if (useMockData) {
-      return _getMockSectors();
+    // 1. Önce yerel CSV'den sektörleri üret. Uygulama API beklemeden açılır.
+    final csvSectors = await _getMockSectors();
+    if (csvSectors.isNotEmpty || useMockData) {
+      return csvSectors;
     }
 
+    // 2. CSV boşsa gerçek API ikinci kaynak olarak denenir.
     final response = await client.get(ApiConstants.sectors);
-
     final data = _extractData(response);
 
     if (data is List) {
@@ -72,14 +161,16 @@ class ApiService {
   Future<({BarcodeListModel list, List<ProductModel> items})> getSectorList(
     String sectorId,
   ) async {
-    if (useMockData) {
-      return _getMockSectorList(sectorId);
+    // 1. Önce CSV'den sektör ürünlerini getir. API ikinci sıradadır.
+    final csvResult = await _getMockSectorList(sectorId);
+    if (csvResult.items.isNotEmpty || useMockData) {
+      return csvResult;
     }
 
+    // 2. CSV'de bu sektör yoksa gerçek API denenir.
     final response = await client.get(
       '${ApiConstants.listItems}/$sectorId/items',
     );
-
     final data = _extractData(response);
 
     if (data is Map) {
@@ -199,21 +290,6 @@ class ApiService {
     final items = itemsJson.map((item) => ProductModel.fromJson(item)).toList();
 
     return (list: list, items: items);
-  }
-
-  Future<ProductModel> _getMockProductByBarcode(String barcode) async {
-    final products = await _loadCsvProducts();
-
-    for (final product in products) {
-      if (product['barcode']?.toString().trim() == barcode) {
-        return ProductModel.fromJson(product);
-      }
-    }
-
-    return ProductModel.fromJson({
-      'barcode': barcode,
-      'status': 'CSV dosyasında ürün bulunamadı',
-    });
   }
 
   Future<Map<String, dynamic>> _getMockExportJob(String jobId) async {

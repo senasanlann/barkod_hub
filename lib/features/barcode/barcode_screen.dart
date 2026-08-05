@@ -60,7 +60,7 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
         _productResult = result;
       });
 
-      final found = result.name != null;
+      final found = result.name != null && result.name!.trim().isNotEmpty;
       await ServiceLocator.offlineCacheService.cacheProduct(result);
       await ServiceLocator.offlineCacheService.addScanHistory(
         ScanHistoryModel(
@@ -73,8 +73,23 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
       );
 
       if (!mounted) return;
-      _showSuccessMessage(barcode);
-    } on ApiException catch (e) {
+
+      if (found) {
+        setState(() {
+          _productResult = result;
+        });
+        _showSuccessMessage(barcode);
+      } else {
+        setState(() {
+          _productResult = null;
+        });
+        Navigator.pushNamed(
+          context,
+          AppRoutes.productNotFound,
+          arguments: barcode,
+        );
+      }
+    } on ApiException {
       final cached = await ServiceLocator.offlineCacheService.getCachedProduct(
         barcode,
       );
@@ -116,7 +131,11 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
         );
 
         if (!mounted) return;
-        _showErrorMessage(e.message);
+        Navigator.pushNamed(
+          context,
+          AppRoutes.productNotFound,
+          arguments: barcode,
+        );
       }
     } finally {
       if (mounted) {

@@ -11,7 +11,11 @@ class _FakeApiClient extends ApiClient {
   Future<dynamic> get(
     String path, {
     Map<String, dynamic>? queryParameters,
+    dynamic options,
   }) async {
+    if (response is Exception) {
+      throw response as Exception;
+    }
     return response;
   }
 }
@@ -85,17 +89,67 @@ void main() {
       expect(result['status'], 'ready');
       expect(result['links']['pdf'], 'https://example.com/job-1.pdf');
     });
+  });
 
-    test('returns mock export links in mock data mode', () async {
-      final service = ApiService(client: _FakeApiClient(null));
+  group('ApiService tiered barcode lookup with Open Food Facts API', () {
+    test('step 1: returns product from CSV when present', () async {
+      final service = ApiService(
+        useMockData: false,
+        client: _FakeApiClient(null),
+      );
 
-      final result = await service.getExportJob('job-2');
-      final links = result['links'] as Map<String, dynamic>;
+      final product = await service.getProductByBarcode('8695077102010');
 
-      expect(result['status'], 'ready');
-      expect(links['pdf'], 'https://example.com/export/job-2.pdf');
-      expect(links['excel'], 'https://example.com/export/job-2.xlsx');
-      expect(links['zip'], 'https://example.com/export/job-2.zip');
+      expect(product.name, 'Dost Tam Yağlı Süt');
+      expect(product.category, 'Süt');
+    });
+
+    test('step 2: queries OFF API when barcode is not in CSV and parses product with status 1', () async {
+      final service = ApiService(
+        useMockData: false,
+        client: _FakeApiClient({
+          'status': 1,
+          'product': {
+            'code': '5449000000996',
+            'product_name': 'Coca-Cola Zero',
+            'brands': 'Coca-Cola',
+            'categories': 'İçecekler, Gazlı İçecekler, Kolalı İçecekler',
+            'image_url': 'https://images.openfoodfacts.org/front.jpg',
+          },
+        }),
+      );
+
+      final product = await service.getProductByBarcode('9990000000099');
+
+      expect(product.name, 'Coca-Cola Zero');
+      expect(product.brand, 'Coca-Cola');
+      expect(product.category, 'İçecekler');
+      expect(product.imageUrl, 'https://images.openfoodfacts.org/front.jpg');
+      expect(product.price, isNull);
+    });
+
+    test('step 3: returns status "Ürün bulunamadı" when OFF API returns status 0', () async {
+      final service = ApiService(
+        useMockData: false,
+        client: _FakeApiClient({'status': 0}),
+      );
+
+      final product = await service.getProductByBarcode('0000000000000');
+
+      expect(product.name, isNull);
+      expect(product.rawData['status'], 'Ürün bulunamadı');
+    });
+
+    test('gracefully handles network exception and falls back to "Ürün bulunamadı"', () async {
+      final service = ApiService(
+        useMockData: false,
+        client: _FakeApiClient(Exception('Network error')),
+      );
+
+      final product = await service.getProductByBarcode('0000000000000');
+
+      expect(product.name, isNull);
+      expect(product.rawData['status'], 'Ürün bulunamadı');
     });
   });
 
@@ -103,7 +157,10 @@ void main() {
     test(
       'getSectors returns non-empty mock sectors without hitting the client',
       () async {
-        final service = ApiService(client: _FakeApiClient(null));
+        final service = ApiService(
+          useMockData: true,
+          client: _FakeApiClient(null),
+        );
 
         final sectors = await service.getSectors();
 
@@ -112,7 +169,10 @@ void main() {
     );
 
     test('getSectorList returns items for a known mock sector', () async {
-      final service = ApiService(client: _FakeApiClient(null));
+      final service = ApiService(
+        useMockData: true,
+        client: _FakeApiClient(null),
+      );
 
       final sectors = await service.getSectors();
       final result = await service.getSectorList(sectors.first.id);
@@ -122,7 +182,10 @@ void main() {
     });
 
     test('finds a product by barcode from the bundled CSV', () async {
-      final service = ApiService(client: _FakeApiClient(null));
+      final service = ApiService(
+        useMockData: true,
+        client: _FakeApiClient(null),
+      );
 
       final product = await service.getProductByBarcode('8695077102010');
 

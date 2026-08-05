@@ -26,14 +26,40 @@ class ProductModel {
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
       rawData: json,
-      id: _readFirst(json, ['id', 'productId', 'product_id']),
-      barcode: _readFirst(json, ['barcode', 'barCode', 'barkod']),
-      name: _readFirst(json, ['name', 'productName', 'title', 'urunAdi']),
-      brand: _readFirst(json, ['brand', 'brandName', 'manufacturer', 'marka']),
+      id: _readFirst(json, ['id', 'productId', 'product_id', '_id']),
+      barcode: _readFirst(json, ['barcode', 'barCode', 'barkod', 'code']),
+      name: _readFirst(json, [
+        'name',
+        'productName',
+        'title',
+        'urunAdi',
+        'product_name',
+        'product_name_tr',
+        'product_name_en',
+      ]),
+      brand: _readFirst(json, [
+        'brand',
+        'brandName',
+        'manufacturer',
+        'marka',
+        'brands',
+      ]),
       sector: _readFirst(json, ['sector', 'sectorName', 'sector_name']),
-      category: _readFirst(json, ['category', 'categoryName', 'kategori']),
+      category: _readFirst(json, [
+        'category',
+        'categoryName',
+        'kategori',
+        'categories',
+      ]),
       price: _readDouble(json, ['price', 'salePrice', 'sale_price', 'fiyat']),
-      imageUrl: _readFirst(json, ['imageUrl', 'image_url', 'image', 'gorsel']),
+      imageUrl: _readFirst(json, [
+        'imageUrl',
+        'image_url',
+        'image',
+        'gorsel',
+        'image_front_url',
+        'image_small_url',
+      ]),
       updatedAt: _readFirst(json, ['updatedAt', 'updated_at', 'lastUpdate']),
     );
   }

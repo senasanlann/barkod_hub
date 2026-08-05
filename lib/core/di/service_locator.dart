@@ -3,6 +3,7 @@ import '../services/api_service.dart';
 import '../services/export_file_service.dart';
 import '../services/file_download_service.dart';
 import '../services/offline_cache_service.dart';
+import '../services/suggestion_queue_service.dart';
 
 class ServiceLocator {
   ServiceLocator._();
@@ -20,6 +21,9 @@ class ServiceLocator {
   );
 
   static final OfflineCacheService offlineCacheService = OfflineCacheService();
+
+  static final SuggestionQueueService suggestionQueueService =
+      SuggestionQueueService();
 
   static ApiService? _apiServiceOverride;
 

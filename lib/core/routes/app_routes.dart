@@ -5,4 +5,6 @@ class AppRoutes {
   static const String sectorDetail = '/sector-detail';
   static const String downloads = '/downloads';
   static const String history = '/history';
+  static const String productNotFound = '/product-not-found';
+  static const String suggestionForm = '/suggestion-form';
 }
