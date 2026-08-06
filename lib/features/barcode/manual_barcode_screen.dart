@@ -78,7 +78,7 @@ class _ManualBarcodeScreenState extends State<ManualBarcodeScreen> {
 
     if (!BarcodeValidator.isValid(barcode)) {
       _showErrorMessage(
-        'Barkod yalnızca rakamlardan oluşmalı ve 8 veya 13 hane olmalıdır.',
+        'Barkod yalnızca rakamlardan oluşmalı ve 8, 12, 13 veya 14 hane olmalıdır.',
       );
       return;
     }

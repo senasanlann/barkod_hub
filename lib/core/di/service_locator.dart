@@ -4,6 +4,7 @@ import '../services/auth_service.dart';
 import '../services/export_file_service.dart';
 import '../services/favorites_service.dart';
 import '../services/file_download_service.dart';
+import '../services/local_storage_service.dart';
 import '../services/log_service.dart';
 import '../services/offline_cache_service.dart';
 import '../services/suggestion_queue_service.dart';
@@ -33,6 +34,8 @@ class ServiceLocator {
   static final FavoritesService favoritesService = FavoritesService();
 
   static final LogService logService = LogService();
+
+  static final LocalStorageService localStorageService = LocalStorageService();
 
   static ApiService? _apiServiceOverride;
 

@@ -6,6 +6,7 @@ import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:share_plus/share_plus.dart';
 
+import 'error_tracker.dart';
 import '../../features/downloads/models/download_file_model.dart';
 
 class FileDownloadService {
@@ -29,21 +30,26 @@ class FileDownloadService {
     required String fileName,
     required String fileType,
   }) async {
-    final downloadsDirectory = await getDownloadsDirectory();
-    final filePath = '${downloadsDirectory.path}/$fileName';
+    try {
+      final downloadsDirectory = await getDownloadsDirectory();
+      final filePath = '${downloadsDirectory.path}/$fileName';
 
-    await dio.download(url, filePath);
+      await dio.download(url, filePath);
 
-    final file = File(filePath);
-    final stat = await file.stat();
+      final file = File(filePath);
+      final stat = await file.stat();
 
-    return DownloadFileModel(
-      fileName: fileName,
-      fileType: fileType,
-      path: filePath,
-      size: stat.size,
-      downloadedAt: DateTime.now().toIso8601String(),
-    );
+      return DownloadFileModel(
+        fileName: fileName,
+        fileType: fileType,
+        path: filePath,
+        size: stat.size,
+        downloadedAt: DateTime.now().toIso8601String(),
+      );
+    } catch (e, stackTrace) {
+      await ErrorTracker.trackDownloadError(e, stackTrace: stackTrace);
+      rethrow;
+    }
   }
 
   Future<DownloadFileModel> saveGeneratedFile({

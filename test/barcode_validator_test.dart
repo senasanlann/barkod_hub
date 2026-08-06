@@ -7,8 +7,16 @@ void main() {
       expect(BarcodeValidator.isValid('12345678'), isTrue);
     });
 
-    test('accepts 13 digit barcode', () {
+    test('accepts 12 digit UPC-A barcode', () {
+      expect(BarcodeValidator.isValid('012345678905'), isTrue);
+    });
+
+    test('accepts 13 digit EAN-13 barcode', () {
       expect(BarcodeValidator.isValid('8690123456789'), isTrue);
+    });
+
+    test('accepts 14 digit GTIN-14 barcode', () {
+      expect(BarcodeValidator.isValid('10012345678902'), isTrue);
     });
 
     test('rejects non numeric barcode', () {

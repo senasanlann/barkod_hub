@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 
 import 'api_constants.dart';
 import 'api_exception.dart';
+import 'auth_interceptor.dart';
 
 class ApiClient {
   final Dio _dio = Dio(
@@ -15,6 +16,10 @@ class ApiClient {
       },
     ),
   );
+
+  ApiClient() {
+    _dio.interceptors.add(AuthInterceptor());
+  }
 
   Dio get dio => _dio;
 

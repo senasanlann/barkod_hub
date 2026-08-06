@@ -4,6 +4,7 @@ import 'package:mobile_scanner/mobile_scanner.dart';
 import '../../core/di/service_locator.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/services/error_tracker.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../core/utils/barcode_validator.dart';
 import '../../features/history/models/scan_history_model.dart';
@@ -37,7 +38,7 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
 
     if (!BarcodeValidator.isValid(barcode)) {
       _showErrorMessage(
-        'Okunan barkod geçerli değil. Barkod 8 veya 13 haneli olmalıdır.',
+        'Okunan barkod geçerli değil. Barkod 8, 12, 13 veya 14 haneli olmalıdır.',
       );
       return;
     }
@@ -98,7 +99,8 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
           arguments: barcode,
         );
       }
-    } on ApiException {
+    } on ApiException catch (e) {
+      await ErrorTracker.trackCameraError(e);
       final cached = await ServiceLocator.offlineCacheService.getCachedProduct(
         barcode,
       );
