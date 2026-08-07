@@ -68,25 +68,41 @@ class ApiClient {
   ApiException _handleDioException(DioException e) {
     final data = e.response?.data;
     String? serverMessage;
+    List<String> serverErrors = [];
+
     if (data is Map) {
       final msg = data['message'];
       if (msg != null && msg.toString().trim().isNotEmpty) {
         serverMessage = msg.toString().trim();
       }
+
+      final errs = data['errors'];
+      if (errs is List) {
+        serverErrors = errs.map((e) => e.toString().trim()).where((s) => s.isNotEmpty).toList();
+      }
     }
 
     final statusCode = e.response?.statusCode;
     if (statusCode != null) {
+      if (statusCode == 401) {
+        return ApiException(serverMessage ?? 'Oturum süreniz doldu, lütfen tekrar giriş yapın.');
+      }
+      if (statusCode == 403) {
+        return ApiException(serverMessage ?? 'Bu işlem için yetkiniz bulunmuyor.');
+      }
       if (statusCode == 404) {
-        return ApiException(serverMessage ?? 'Ürün bulunamadı');
+        return ApiException(serverMessage ?? 'Kayıt veya ürün bulunamadı.');
       }
       if (statusCode == 429) {
         return ApiException(
-          serverMessage ?? 'Çok fazla istek gönderildi, lütfen bekleyin',
+          serverMessage ?? 'Çok fazla istek gönderildi, lütfen bir süre bekleyin.',
         );
       }
       if (statusCode >= 500) {
-        return ApiException(serverMessage ?? 'Sunucu hatası');
+        return ApiException(serverMessage ?? 'Sunucu hatası oluştu, lütfen daha sonra tekrar deneyin.');
+      }
+      if (serverErrors.isNotEmpty) {
+        return ApiException(serverErrors.join('\n'));
       }
       if (serverMessage != null) {
         return ApiException(serverMessage);
@@ -97,9 +113,9 @@ class ApiClient {
         e.type == DioExceptionType.sendTimeout ||
         e.type == DioExceptionType.receiveTimeout ||
         e.type == DioExceptionType.connectionError) {
-      return const ApiException('İnternet bağlantısı yok');
+      return const ApiException('İnternet bağlantısı sağlanan süre içerisinde yanıt vermedi.');
     }
 
-    return ApiException(serverMessage ?? 'İnternet bağlantısı yok');
+    return ApiException(serverMessage ?? 'Sunucuya ulaşılamadı. İnternet bağlantınızı kontrol edin.');
   }
 }

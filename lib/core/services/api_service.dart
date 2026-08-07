@@ -9,6 +9,7 @@ import '../../features/sectors/models/sector_model.dart';
 import '../../features/suggestion/models/suggestion_model.dart';
 import '../network/api_client.dart';
 import '../network/api_constants.dart';
+import '../network/api_exception.dart';
 
 class ApiService {
   final ApiClient client;
@@ -245,9 +246,47 @@ class ApiService {
         .toList();
   }
 
+  Future<List<ProductModel>> searchProducts(String query) async {
+    final trimmed = query.trim().toLowerCase();
+    if (trimmed.isEmpty) return const [];
+
+    final csvProducts = await _loadCsvProducts();
+    final matches = csvProducts.where((p) {
+      final name = p['name']?.toString().toLowerCase() ?? '';
+      final barcode = p['barcode']?.toString().toLowerCase() ?? '';
+      final brand = p['brand']?.toString().toLowerCase() ?? '';
+      return name.contains(trimmed) || barcode.contains(trimmed) || brand.contains(trimmed);
+    }).map((json) => ProductModel.fromJson(json)).toList();
+
+    if (matches.isNotEmpty || useMockData) {
+      return matches;
+    }
+
+    final response = await client.get(
+      '/api/v1/products/search',
+      queryParameters: {'q': query},
+    );
+    final data = _extractData(response);
+
+    if (data is List) {
+      return data
+          .whereType<Map>()
+          .map((item) => ProductModel.fromJson(Map<String, dynamic>.from(item)))
+          .toList();
+    }
+
+    return const [];
+  }
+
   dynamic _extractData(dynamic response) {
-    if (response is Map && response.containsKey('data')) {
-      return response['data'];
+    if (response is Map) {
+      if (response.containsKey('success') && response['success'] == false) {
+        final message = response['message']?.toString() ?? 'İşlem başarısız oldu.';
+        throw ApiException(message);
+      }
+      if (response.containsKey('data')) {
+        return response['data'];
+      }
     }
 
     return response;
