@@ -223,7 +223,19 @@ class _HomeScreenState extends State<HomeScreen> {
     final user = _currentUser;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Ana Sayfa')),
+      appBar: AppBar(
+        title: const Text('Ana Sayfa'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.settings_outlined),
+            tooltip: 'Ayarlar',
+            onPressed: () async {
+              await Navigator.pushNamed(context, AppRoutes.settings);
+              await _loadUser();
+            },
+          ),
+        ],
+      ),
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),

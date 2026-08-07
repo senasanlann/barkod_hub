@@ -23,6 +23,7 @@ class BarcodeScreen extends StatefulWidget {
 class _BarcodeScreenState extends State<BarcodeScreen> {
   final MobileScannerController _scannerController = MobileScannerController();
   bool _isProcessing = false;
+  bool _isTorchOn = false;
   ProductModel? _productResult;
   String? _lastScannedBarcode;
 
@@ -72,6 +73,10 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
 
       final found = result.name != null && result.name!.trim().isNotEmpty;
       await ServiceLocator.offlineCacheService.cacheProduct(result);
+      await ServiceLocator.apiService.postScanLog(
+        barcode,
+        found ? 'success' : 'not_found',
+      );
       await ServiceLocator.offlineCacheService.addScanHistory(
         ScanHistoryModel(
           barcode: barcode,
@@ -229,17 +234,116 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
               Expanded(
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(16),
-                  child: MobileScanner(
-                    controller: _scannerController,
-                    onDetect: (capture) {
-                      final barcode = capture.barcodes.isEmpty
-                          ? null
-                          : capture.barcodes.first.rawValue;
-                      _handleBarcode(barcode);
-                    },
+                  child: Stack(
+                    children: [
+                      MobileScanner(
+                        controller: _scannerController,
+                        errorBuilder: (context, error) {
+                          return Container(
+                            color: Colors.black87,
+                            padding: const EdgeInsets.all(AppSpacing.lg),
+                            child: Center(
+                              child: Column(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  const Icon(
+                                    Icons.camera_alt_outlined,
+                                    size: 48,
+                                    color: Colors.orange,
+                                  ),
+                                  const SizedBox(height: AppSpacing.sm),
+                                  const Text(
+                                    'Kamera İzni Gerekli',
+                                    style: TextStyle(
+                                      color: Colors.white,
+                                      fontWeight: FontWeight.bold,
+                                      fontSize: 16,
+                                    ),
+                                  ),
+                                  const SizedBox(height: AppSpacing.xs),
+                                  const Text(
+                                    'Barkod okutabilmek için kamera izni gereklidir.',
+                                    textAlign: TextAlign.center,
+                                    style: TextStyle(color: Colors.white70),
+                                  ),
+                                  const SizedBox(height: AppSpacing.md),
+                                  AppButton(
+                                    text: 'Manuel Girişe Git',
+                                    icon: Icons.edit,
+                                    variant: AppButtonVariant.outline,
+                                    onPressed: () {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.manualBarcode,
+                                      );
+                                    },
+                                  ),
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                        onDetect: (capture) {
+                          final barcode = capture.barcodes.isEmpty
+                              ? null
+                              : capture.barcodes.first.rawValue;
+                          _handleBarcode(barcode);
+                        },
+                      ),
+                      Positioned(
+                        top: 12,
+                        right: 12,
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: Colors.black54,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: IconButton(
+                            icon: Icon(
+                              _isTorchOn ? Icons.flash_on : Icons.flash_off,
+                              color: _isTorchOn ? Colors.amber : Colors.white,
+                            ),
+                            tooltip: _isTorchOn ? 'Flaş Kapat' : 'Flaş Aç',
+                            onPressed: () async {
+                              await _scannerController.toggleTorch();
+                              setState(() {
+                                _isTorchOn = !_isTorchOn;
+                              });
+                            },
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
+              if (_lastScannedBarcode != null) ...[
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.md,
+                    vertical: AppSpacing.sm,
+                  ),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).cardColor,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Theme.of(context).dividerColor),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.qr_code, size: 20),
+                      const SizedBox(width: AppSpacing.xs),
+                      Text(
+                        'Son Okunan: $_lastScannedBarcode',
+                        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                              fontWeight: FontWeight.bold,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
               if (_isProcessing) ...[
                 const SizedBox(height: AppSpacing.md),
                 Text(
@@ -262,6 +366,7 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
               AppButton(
                 text: 'Manuel Girişe Git',
                 icon: Icons.edit,
+                variant: AppButtonVariant.outline,
                 onPressed: () {
                   Navigator.pushNamed(context, AppRoutes.manualBarcode);
                 },

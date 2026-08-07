@@ -25,4 +25,6 @@ class ApiConstants {
   static const String productSuggestions = '/api/v1/product-suggestions';
 
   static const String imageReports = '/api/v1/image-reports';
+
+  static const String scanLogs = '/api/v1/scan-logs';
 }

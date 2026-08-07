@@ -146,11 +146,27 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 return AppCard(
                   child: Row(
                     children: [
-                      AppIconBox(
-                        icon: meta.icon,
-                        color: meta.color,
-                        backgroundColor: meta.color.withValues(alpha: 0.12),
-                      ),
+                      if (entry.imageUrl != null && entry.imageUrl!.trim().isNotEmpty)
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.network(
+                            entry.imageUrl!,
+                            width: 44,
+                            height: 44,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => AppIconBox(
+                              icon: meta.icon,
+                              color: meta.color,
+                              backgroundColor: meta.color.withValues(alpha: 0.12),
+                            ),
+                          ),
+                        )
+                      else
+                        AppIconBox(
+                          icon: meta.icon,
+                          color: meta.color,
+                          backgroundColor: meta.color.withValues(alpha: 0.12),
+                        ),
                       const SizedBox(width: AppSpacing.md),
                       Expanded(
                         child: Column(

@@ -305,15 +305,19 @@ class _ProductResultCardState extends State<ProductResultCard> {
     if (!_hasValue(widget.product.imageUrl)) {
       return _placeholder(context);
     }
-    return ClipRRect(
-      borderRadius: AppRadius.radiusMd,
-      child: Container(
-        height: 180,
-        width: double.infinity,
-        color: AppColors.card,
+    return Container(
+      height: 200,
+      width: double.infinity,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: AppRadius.radiusMd,
+        border: Border.all(color: AppColors.border),
+      ),
+      child: ClipRRect(
+        borderRadius: AppRadius.radiusMd,
         child: Image.network(
           widget.product.imageUrl!,
-          height: 180,
+          height: 200,
           width: double.infinity,
           fit: BoxFit.contain,
           loadingBuilder: (context, child, loadingProgress) {
@@ -450,8 +454,15 @@ class _ProductResultCardState extends State<ProductResultCard> {
         k == 'sale_price' ||
         k == 'source' ||
         k == 'kaynak' ||
+        k == 'source_url' ||
+        k == 'sourceurl' ||
+        k == 'image' ||
+        k == 'imageurl' ||
+        k == 'image_url' ||
         k == 'updatedat' ||
         k == 'updated_at' ||
+        k == 'createdat' ||
+        k == 'created_at' ||
         k == 'lastupdate';
   }
 }

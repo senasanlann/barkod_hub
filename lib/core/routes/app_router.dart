@@ -11,6 +11,9 @@ import '../../features/history/history_screen.dart';
 import '../../features/home/home_screen.dart';
 import '../../features/sectors/models/sector_model.dart';
 import '../../features/sectors/sector_detail_screen.dart';
+import '../../features/settings/settings_screen.dart';
+import '../../features/splash/splash_screen.dart';
+import '../../features/auth/welcome_auth_screen.dart';
 import '../../features/suggestion/product_not_found_screen.dart';
 import '../../features/suggestion/suggestion_form_screen.dart';
 import 'app_routes.dart';
@@ -18,6 +21,15 @@ import 'app_routes.dart';
 class AppRouter {
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case AppRoutes.splash:
+        return MaterialPageRoute(builder: (_) => const SplashScreen());
+
+      case AppRoutes.welcomeAuth:
+        return MaterialPageRoute(builder: (_) => const WelcomeAuthScreen());
+
+      case AppRoutes.settings:
+        return MaterialPageRoute(builder: (_) => const SettingsScreen());
+
       case AppRoutes.home:
         return MaterialPageRoute(builder: (_) => const HomeScreen());
 

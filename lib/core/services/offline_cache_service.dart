@@ -195,4 +195,12 @@ class OfflineCacheService {
       await file.delete();
     }
   }
+
+  Future<void> clearAllCache() async {
+    final prefs = await _preferences;
+    final keys = prefs.getKeys().where((k) => k.startsWith('cache_') || k.startsWith('box_')).toList();
+    for (final key in keys) {
+      await prefs.remove(key);
+    }
+  }
 }

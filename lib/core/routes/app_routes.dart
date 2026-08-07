@@ -11,4 +11,7 @@ class AppRoutes {
   static const String favorites = '/favorites';
   static const String adminLogs = '/admin-logs';
   static const String adminReports = '/admin-reports';
+  static const String splash = '/splash';
+  static const String welcomeAuth = '/welcome-auth';
+  static const String settings = '/settings';
 }

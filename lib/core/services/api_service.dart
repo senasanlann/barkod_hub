@@ -137,6 +137,22 @@ class ApiService {
     });
   }
 
+  Future<bool> postScanLog(String barcode, String status) async {
+    try {
+      await client.post(
+        ApiConstants.scanLogs,
+        data: {
+          'barcode': barcode,
+          'status': status,
+          'scannedAt': DateTime.now().toIso8601String(),
+        },
+      );
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<List<SectorModel>> getSectors() async {
     // 1. Önce yerel CSV'den sektörleri üret. Uygulama API beklemeden açılır.
     final csvSectors = await _getMockSectors();

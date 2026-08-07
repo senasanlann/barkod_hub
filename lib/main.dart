@@ -20,7 +20,7 @@ class BarkodHubApp extends StatelessWidget {
       title: 'Barkod Hub',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.lightTheme,
-      initialRoute: AppRoutes.home,
+      initialRoute: AppRoutes.splash,
       onGenerateRoute: AppRouter.generateRoute,
     );
   }

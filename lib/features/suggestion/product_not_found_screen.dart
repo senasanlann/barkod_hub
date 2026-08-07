@@ -23,7 +23,7 @@ class ProductNotFoundScreen extends StatelessWidget {
     return Scaffold(
       appBar: AppBar(title: const Text('Ürün Bulunamadı')),
       body: SafeArea(
-        child: Padding(
+        child: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -91,6 +91,19 @@ class ProductNotFoundScreen extends StatelessWidget {
                   } else {
                     Navigator.pushReplacementNamed(context, AppRoutes.barcode);
                   }
+                },
+              ),
+              const SizedBox(height: AppSpacing.sm),
+              AppButton(
+                text: 'Manuel Bilgi Ekle',
+                icon: Icons.edit_note_outlined,
+                variant: AppButtonVariant.outline,
+                onPressed: () {
+                  Navigator.pushNamed(
+                    context,
+                    AppRoutes.suggestionForm,
+                    arguments: barcode,
+                  );
                 },
               ),
               const SizedBox(height: AppSpacing.sm),

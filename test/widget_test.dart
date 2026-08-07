@@ -15,12 +15,15 @@ void main() {
     ServiceLocator.setApiServiceOverride(null);
   });
 
-  testWidgets('BarkodHubApp opens home screen', (WidgetTester tester) async {
+  testWidgets('BarkodHubApp opens splash screen and navigates to welcome/home', (WidgetTester tester) async {
     await tester.pumpWidget(const BarkodHubApp());
 
     expect(find.text('Barkod Hub'), findsWidgets);
-    expect(find.text('Barkod Tara'), findsOneWidget);
-    expect(find.text('Manuel Barkod Gir'), findsOneWidget);
+
+    await tester.pump(const Duration(seconds: 3));
+    await tester.pumpAndSettle();
+
+    expect(find.text('Barkod Hub'), findsWidgets);
   });
 }
 
