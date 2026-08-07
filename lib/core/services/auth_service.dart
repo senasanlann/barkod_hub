@@ -31,7 +31,11 @@ class AuthService {
     }
   }
 
-  Future<bool> login(String email, String password) async {
+  Future<bool> login(
+    String email,
+    String password, {
+    UserRole? role,
+  }) async {
     final prefs = await _preferences;
 
     final trimmedEmail = email.trim();
@@ -39,17 +43,18 @@ class AuthService {
       return false;
     }
 
-    final role = trimmedEmail.toLowerCase().contains('admin')
-        ? UserRole.admin
-        : trimmedEmail.toLowerCase().contains('editor')
-            ? UserRole.editor
-            : UserRole.user;
+    final assignedRole = role ??
+        (trimmedEmail.toLowerCase().contains('admin')
+            ? UserRole.admin
+            : trimmedEmail.toLowerCase().contains('editor')
+                ? UserRole.editor
+                : UserRole.user);
 
     final user = UserModel(
       id: 'usr_${DateTime.now().millisecondsSinceEpoch}',
       email: trimmedEmail,
       name: trimmedEmail.split('@').first,
-      role: role,
+      role: assignedRole,
       token: 'jwt_token_${DateTime.now().millisecondsSinceEpoch}',
     );
 

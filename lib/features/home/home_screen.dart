@@ -41,6 +41,18 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Future<void> _syncPendingQueue() async {
+    // Demo verisine gönderim gerçek bir senkronizasyon değildir. Yerel kayıtları
+    // panelde incelenebilmeleri için pending durumda tut.
+    if (ServiceLocator.apiService.useMockData) {
+      final count = await ServiceLocator.suggestionQueueService.pendingCount();
+      if (mounted) {
+        setState(() {
+          _pendingCount = count;
+        });
+      }
+      return;
+    }
+
     final pending = await ServiceLocator.suggestionQueueService.getPending();
     for (final item in pending) {
       final success = item.type == 'product_suggestion'
@@ -273,22 +285,26 @@ class _HomeScreenState extends State<HomeScreen> {
                 },
               ),
 
-              if (user.role == UserRole.admin) ...[
+              if (user.role == UserRole.admin ||
+                  user.role == UserRole.editor) ...[
                 const SizedBox(height: AppSpacing.md),
                 AppButton(
-                  text: 'Yönetim Özeti & Loglar',
-                  icon: Icons.admin_panel_settings_outlined,
-                  onPressed: () {
-                    Navigator.pushNamed(context, AppRoutes.adminLogs);
-                  },
-                ),
-                const SizedBox(height: AppSpacing.sm),
-                AppButton(
-                  text: 'Veri Kontrolü & Bildirimler',
+                  text: 'Gelen Ürün Önerileri & Bildirimler',
                   icon: Icons.assignment_turned_in_outlined,
-                  variant: AppButtonVariant.outline,
                   onPressed: () {
                     Navigator.pushNamed(context, AppRoutes.adminReports);
+                  },
+                ),
+              ],
+
+              if (user.role == UserRole.admin) ...[
+                const SizedBox(height: AppSpacing.sm),
+                AppButton(
+                  text: 'Sistem Logları & Yönetim Özeti',
+                  icon: Icons.admin_panel_settings_outlined,
+                  variant: AppButtonVariant.outline,
+                  onPressed: () {
+                    Navigator.pushNamed(context, AppRoutes.adminLogs);
                   },
                 ),
               ],

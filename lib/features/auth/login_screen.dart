@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 
 import '../../core/di/service_locator.dart';
 import '../../core/routes/app_routes.dart';
+import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/app_text_field.dart';
+import 'models/user_model.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
@@ -18,13 +20,60 @@ class LoginScreen extends StatefulWidget {
 class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _emailController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  UserRole _selectedRole = UserRole.user;
   bool _isLoading = false;
+  bool _isInitialized = false;
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_isInitialized) {
+      final arg = ModalRoute.of(context)?.settings.arguments as String?;
+      if (arg != null && arg.isNotEmpty) {
+        if (arg.contains('editor')) {
+          _emailController.text = 'editor@bilsoft.com';
+          _passwordController.text = '123456';
+          _selectedRole = UserRole.editor;
+        } else if (arg.contains('admin')) {
+          _emailController.text = 'admin@bilsoft.com';
+          _passwordController.text = '123456';
+          _selectedRole = UserRole.admin;
+        } else {
+          _emailController.text = arg;
+          _passwordController.text = '123456';
+          _selectedRole = UserRole.user;
+        }
+      }
+      _isInitialized = true;
+    }
+  }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
+  }
+
+  void _selectRolePreset(UserRole role) {
+    setState(() {
+      _selectedRole = role;
+      switch (role) {
+        case UserRole.editor:
+          _emailController.text = 'editor@bilsoft.com';
+          _passwordController.text = '123456';
+          break;
+        case UserRole.admin:
+          _emailController.text = 'admin@bilsoft.com';
+          _passwordController.text = '123456';
+          break;
+        case UserRole.user:
+        default:
+          _emailController.text = 'kullanici@bilsoft.com';
+          _passwordController.text = '123456';
+          break;
+      }
+    });
   }
 
   Future<void> _handleLogin() async {
@@ -46,11 +95,18 @@ class _LoginScreenState extends State<LoginScreen> {
     });
 
     try {
-      final success = await ServiceLocator.authService.login(email, password);
+      final success = await ServiceLocator.authService.login(
+        email,
+        password,
+        role: _selectedRole,
+      );
       if (!mounted) return;
 
       if (success) {
-        AppSnackBar.showSuccess(context, 'Giriş başarılı! Hoş geldiniz.');
+        AppSnackBar.showSuccess(
+          context,
+          '${_selectedRole.displayName} olarak giriş yapıldı! Hoş geldiniz.',
+        );
         Navigator.pushNamedAndRemoveUntil(
           context,
           AppRoutes.home,
@@ -101,10 +157,47 @@ class _LoginScreenState extends State<LoginScreen> {
               ),
               const SizedBox(height: AppSpacing.sm),
               Text(
-                'Tüm özellikleri (sınırsız sorgulama, liste indirme ve geçmiş takibi) kullanmak için giriş yapın.',
+                'Giriş yapacağınız rolü seçip e-posta ve şifrenizi girerek işlem yapabilirsiniz.',
                 style: Theme.of(context).textTheme.bodyMedium,
               ),
-              const SizedBox(height: AppSpacing.xl),
+              const SizedBox(height: AppSpacing.lg),
+              Text(
+                'Giriş Rolü Seçin',
+                style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                      fontWeight: FontWeight.bold,
+                    ),
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  children: [
+                    ChoiceChip(
+                      avatar: const Icon(Icons.person_outline, size: 16),
+                      label: const Text('Kayıtlı Kullanıcı'),
+                      selected: _selectedRole == UserRole.user,
+                      onSelected: (_) => _selectRolePreset(UserRole.user),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    ChoiceChip(
+                      avatar: const Icon(Icons.edit_note, size: 16),
+                      label: const Text('Editör'),
+                      selected: _selectedRole == UserRole.editor,
+                      selectedColor: AppColors.primary.withValues(alpha: 0.2),
+                      onSelected: (_) => _selectRolePreset(UserRole.editor),
+                    ),
+                    const SizedBox(width: AppSpacing.xs),
+                    ChoiceChip(
+                      avatar: const Icon(Icons.admin_panel_settings_outlined, size: 16),
+                      label: const Text('Yönetici (Admin)'),
+                      selected: _selectedRole == UserRole.admin,
+                      selectedColor: Colors.orange.withValues(alpha: 0.2),
+                      onSelected: (_) => _selectRolePreset(UserRole.admin),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: AppSpacing.lg),
               AppCard(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -125,7 +218,7 @@ class _LoginScreenState extends State<LoginScreen> {
                     ),
                     const SizedBox(height: AppSpacing.xl),
                     AppButton(
-                      text: 'Giriş Yap',
+                      text: '${_selectedRole.displayName} Olarak Giriş Yap',
                       icon: Icons.login,
                       onPressed: _handleLogin,
                       isLoading: _isLoading,
@@ -136,7 +229,7 @@ class _LoginScreenState extends State<LoginScreen> {
               const SizedBox(height: AppSpacing.lg),
               AppButton(
                 text: 'Misafir Olarak Devam Et',
-                icon: Icons.person_outline,
+                icon: Icons.flash_on_outlined,
                 variant: AppButtonVariant.outline,
                 onPressed: _continueAsGuest,
               ),

@@ -1,6 +1,9 @@
 import 'package:barkod_hub/core/di/service_locator.dart';
 import 'package:barkod_hub/features/sectors/models/sector_model.dart';
 import 'package:barkod_hub/features/sectors/sector_detail_screen.dart';
+import 'package:barkod_hub/features/barcode/widgets/product_result_card.dart';
+import 'package:barkod_hub/features/product/models/product_model.dart';
+import 'package:barkod_hub/features/sectors/widgets/list_product_card.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -46,5 +49,29 @@ void main() {
         await tester.pumpWidget(const SizedBox());
       },
     );
+
+    testWidgets('Tapping ListProductCard opens ProductResultCard modal sheet', (tester) async {
+      final product = const ProductModel(
+        rawData: {'barcode': '8690504018087'},
+        barcode: '8690504018087',
+        name: 'Ülker Çikolatalı Gofret',
+        brand: 'Ülker',
+        price: 15.5,
+      );
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: ListProductCard(product: product),
+          ),
+        ),
+      );
+
+      await tester.tap(find.byType(ListProductCard));
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ProductResultCard), findsOneWidget);
+      expect(find.text('Ülker Çikolatalı Gofret'), findsWidgets);
+    });
   });
 }

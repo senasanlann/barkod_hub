@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/di/service_locator.dart';
+import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../shared/widgets/app_card.dart';
@@ -41,6 +42,23 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
   }
 
   Future<void> _approveReport(SuggestionModel report) async {
+    final processed = report.type == 'image_report'
+        ? await ServiceLocator.apiService.postImageReport(report)
+        : await ServiceLocator.apiService.postProductSuggestion(report);
+
+    if (!mounted) return;
+
+    if (!processed) {
+      await ServiceLocator.suggestionQueueService.markFailed(report.id);
+      if (!mounted) return;
+      AppSnackBar.showError(
+        context,
+        'Bildirim işlenemedi. Kayıt incelenmek üzere listede tutuluyor.',
+      );
+      await _loadReports();
+      return;
+    }
+
     await ServiceLocator.suggestionQueueService.markSynced(report.id);
     if (!mounted) return;
     AppSnackBar.showSuccess(context, 'Bildirim onaylandı ve işlendi.');
@@ -50,7 +68,10 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
   Future<void> _rejectReport(SuggestionModel report) async {
     await ServiceLocator.suggestionQueueService.remove(report.id);
     if (!mounted) return;
-    AppSnackBar.showSuccess(context, 'Bildirim reddedildi ve listeden kaldırıldı.');
+    AppSnackBar.showSuccess(
+      context,
+      'Bildirim reddedildi ve listeden kaldırıldı.',
+    );
     await _loadReports();
   }
 
@@ -60,17 +81,27 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
         ? _reports
         : _reports.where((r) => r.type == _selectedFilter).toList();
 
-    final suggestionsCount =
-        _reports.where((r) => r.type == 'product_suggestion').length;
-    final imageReportsCount =
-        _reports.where((r) => r.type == 'image_report').length;
+    final suggestionsCount = _reports
+        .where((r) => r.type == 'product_suggestion')
+        .length;
+    final imageReportsCount = _reports
+        .where((r) => r.type == 'image_report')
+        .length;
 
     return Scaffold(
       appBar: AppBar(
         title: const Text('Hatalı Barkod ve Öneri Yönetimi'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.receipt_long_outlined),
+            tooltip: 'Sistem Logları',
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.adminLogs);
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Yenile',
             onPressed: _loadReports,
           ),
         ],
@@ -157,9 +188,9 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                                             isSuggestion
                                                 ? 'Yeni Ürün Önerisi'
                                                 : 'Hata / Görsel Bildirimi',
-                                            style: Theme.of(context)
-                                                .textTheme
-                                                .titleSmall,
+                                            style: Theme.of(
+                                              context,
+                                            ).textTheme.titleSmall,
                                           ),
                                         ),
                                         Container(
@@ -168,9 +199,12 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                                             vertical: 2,
                                           ),
                                           decoration: BoxDecoration(
-                                            color: _getStatusColor(item.syncStatus)
-                                                .withValues(alpha: 0.15),
-                                            borderRadius: BorderRadius.circular(4),
+                                            color: _getStatusColor(
+                                              item.syncStatus,
+                                            ).withValues(alpha: 0.15),
+                                            borderRadius: BorderRadius.circular(
+                                              4,
+                                            ),
                                           ),
                                           child: Text(
                                             item.syncStatus.toUpperCase(),
@@ -190,12 +224,14 @@ class _AdminReportsScreenState extends State<AdminReportsScreen> {
                                     if (item.productName != null &&
                                         item.productName!.isNotEmpty)
                                       Text('Ürün Adı: ${item.productName}'),
-                                    if (item.brand != null && item.brand!.isNotEmpty)
+                                    if (item.brand != null &&
+                                        item.brand!.isNotEmpty)
                                       Text('Marka: ${item.brand}'),
                                     if (item.category != null &&
                                         item.category!.isNotEmpty)
                                       Text('Kategori: ${item.category}'),
-                                    if (item.note != null && item.note!.isNotEmpty) ...[
+                                    if (item.note != null &&
+                                        item.note!.isNotEmpty) ...[
                                       const SizedBox(height: AppSpacing.xs),
                                       Text(
                                         'Not: ${item.note}',

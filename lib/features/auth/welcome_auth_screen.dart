@@ -54,13 +54,22 @@ class WelcomeAuthScreen extends StatelessWidget {
               ),
               const Spacer(),
               AppButton(
-                text: 'Kullanıcı / Editör Olarak Giriş Yap',
+                text: 'Kullanıcı Olarak Giriş Yap',
                 icon: Icons.person_outline,
                 onPressed: () {
-                  Navigator.pushNamed(context, AppRoutes.login);
+                  Navigator.pushNamed(context, AppRoutes.login, arguments: 'user@bilsoft.com');
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
+              AppButton(
+                text: 'Editör Olarak Giriş Yap',
+                icon: Icons.edit_note,
+                variant: AppButtonVariant.outline,
+                onPressed: () {
+                  Navigator.pushNamed(context, AppRoutes.login, arguments: 'editor@bilsoft.com');
+                },
+              ),
+              const SizedBox(height: AppSpacing.sm),
               AppButton(
                 text: 'Yönetici (Admin) Olarak Giriş Yap',
                 icon: Icons.admin_panel_settings_outlined,
@@ -73,7 +82,7 @@ class WelcomeAuthScreen extends StatelessWidget {
                   );
                 },
               ),
-              const SizedBox(height: AppSpacing.md),
+              const SizedBox(height: AppSpacing.sm),
               OutlinedButton.icon(
                 onPressed: () async {
                   await ServiceLocator.authService.loginAsGuest();

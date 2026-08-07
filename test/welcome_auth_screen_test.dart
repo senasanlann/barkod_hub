@@ -20,7 +20,8 @@ void main() {
     );
 
     expect(find.text('Barkod Hub'), findsOneWidget);
-    expect(find.text('Kullanıcı / Editör Olarak Giriş Yap'), findsOneWidget);
+    expect(find.text('Kullanıcı Olarak Giriş Yap'), findsOneWidget);
+    expect(find.text('Editör Olarak Giriş Yap'), findsOneWidget);
     expect(find.text('Yönetici (Admin) Olarak Giriş Yap'), findsOneWidget);
     expect(find.text('Misafir Olarak Devam Et (Sınırlı Sorgu)'), findsOneWidget);
   });

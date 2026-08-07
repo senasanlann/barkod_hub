@@ -12,6 +12,7 @@ import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_icon_box.dart';
 import '../../../shared/widgets/app_sector_emblem.dart';
 import '../../../shared/widgets/app_snack_bar.dart';
+import '../../auth/models/user_model.dart';
 import '../../product/models/product_model.dart';
 import '../../suggestion/models/suggestion_model.dart';
 
@@ -113,7 +114,7 @@ class _ProductResultCardState extends State<ProductResultCard> {
     Navigator.pushNamed(
       context,
       AppRoutes.suggestionForm,
-      arguments: widget.product.barcode ?? '',
+      arguments: widget.product,
     );
   }
 
@@ -163,9 +164,45 @@ class _ProductResultCardState extends State<ProductResultCard> {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
-                  child: Text(
-                    'Sorgu Sonucu',
-                    style: Theme.of(context).textTheme.titleMedium,
+                  child: Row(
+                    children: [
+                      Text(
+                        'Sorgu Sonucu',
+                        style: Theme.of(context).textTheme.titleMedium,
+                      ),
+                      const SizedBox(width: AppSpacing.xs),
+                      FutureBuilder<UserModel>(
+                        future: ServiceLocator.authService.getCurrentUser(),
+                        builder: (context, snapshot) {
+                          final user = snapshot.data;
+                          if (user == null ||
+                              (user.role != UserRole.editor &&
+                                  user.role != UserRole.admin)) {
+                            return const SizedBox();
+                          }
+                          return Container(
+                            padding: const EdgeInsets.symmetric(
+                              horizontal: 6,
+                              vertical: 2,
+                            ),
+                            decoration: BoxDecoration(
+                              color: AppColors.primary.withValues(alpha: 0.15),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                            child: Text(
+                              user.role == UserRole.editor
+                                  ? 'EDITÖR'
+                                  : 'ADMIN',
+                              style: const TextStyle(
+                                fontSize: 10,
+                                fontWeight: FontWeight.bold,
+                                color: AppColors.primary,
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                    ],
                   ),
                 ),
                 IconButton(

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../core/di/service_locator.dart';
+import '../../core/routes/app_routes.dart';
 import '../../core/services/log_service.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
@@ -75,11 +76,20 @@ class _AdminLogScreenState extends State<AdminLogScreen> {
         title: const Text('Mobil Log Kontrolü'),
         actions: [
           IconButton(
+            icon: const Icon(Icons.assignment_turned_in_outlined),
+            tooltip: 'Gelen Öneriler & Bildirimler',
+            onPressed: () {
+              Navigator.pushNamed(context, AppRoutes.adminReports);
+            },
+          ),
+          IconButton(
             icon: const Icon(Icons.refresh),
+            tooltip: 'Yenile',
             onPressed: _loadLogs,
           ),
           IconButton(
             icon: const Icon(Icons.delete_outline),
+            tooltip: 'Logları Temizle',
             onPressed: _clearLogs,
           ),
         ],

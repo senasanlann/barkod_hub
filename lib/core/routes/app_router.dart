@@ -14,6 +14,7 @@ import '../../features/sectors/sector_detail_screen.dart';
 import '../../features/settings/settings_screen.dart';
 import '../../features/splash/splash_screen.dart';
 import '../../features/auth/welcome_auth_screen.dart';
+import '../../features/product/models/product_model.dart';
 import '../../features/suggestion/product_not_found_screen.dart';
 import '../../features/suggestion/suggestion_form_screen.dart';
 import 'app_routes.dart';
@@ -64,7 +65,16 @@ class AppRouter {
         );
 
       case AppRoutes.suggestionForm:
-        final barcode = settings.arguments as String? ?? '';
+        final arg = settings.arguments;
+        if (arg is ProductModel) {
+          return MaterialPageRoute(
+            builder: (_) => SuggestionFormScreen(
+              barcode: arg.barcode ?? '',
+              initialProduct: arg,
+            ),
+          );
+        }
+        final barcode = arg as String? ?? '';
         return MaterialPageRoute(
           builder: (_) => SuggestionFormScreen(barcode: barcode),
         );

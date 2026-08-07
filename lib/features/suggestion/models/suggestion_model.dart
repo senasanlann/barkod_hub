@@ -5,6 +5,7 @@ class SuggestionModel {
   final String? productName;
   final String? brand;
   final String? category;
+  final String? sector;
   final String? note;
   final String? imagePath;
   final DateTime createdAt;
@@ -18,6 +19,7 @@ class SuggestionModel {
     this.productName,
     this.brand,
     this.category,
+    this.sector,
     this.note,
     this.imagePath,
     required this.createdAt,
@@ -33,6 +35,7 @@ class SuggestionModel {
     String? productName,
     String? brand,
     String? category,
+    String? sector,
     String? note,
     String? imagePath,
   }) {
@@ -46,6 +49,7 @@ class SuggestionModel {
       productName: productName,
       brand: brand,
       category: category,
+      sector: sector,
       note: note,
       imagePath: imagePath,
       createdAt: now,
@@ -61,6 +65,7 @@ class SuggestionModel {
     String? productName,
     String? brand,
     String? category,
+    String? sector,
     String? note,
     String? imagePath,
     DateTime? createdAt,
@@ -74,6 +79,7 @@ class SuggestionModel {
       productName: productName ?? this.productName,
       brand: brand ?? this.brand,
       category: category ?? this.category,
+      sector: sector ?? this.sector,
       note: note ?? this.note,
       imagePath: imagePath ?? this.imagePath,
       createdAt: createdAt ?? this.createdAt,
@@ -90,6 +96,7 @@ class SuggestionModel {
       'productName': productName,
       'brand': brand,
       'category': category,
+      'sector': sector,
       'note': note,
       'imagePath': imagePath,
       'createdAt': createdAt.toIso8601String(),
@@ -111,6 +118,7 @@ class SuggestionModel {
       productName: _readFirst(json, ['productName', 'product_name', 'name']),
       brand: _readFirst(json, ['brand', 'brands']),
       category: _readFirst(json, ['category', 'categories']),
+      sector: _readFirst(json, ['sector', 'sektor']),
       note: _readFirst(json, ['note', 'description']),
       imagePath: _readFirst(json, ['imagePath', 'image_path']),
       createdAt: parsedDate,
