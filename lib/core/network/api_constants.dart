@@ -13,7 +13,7 @@ class ApiConstants {
 
   static const bool useMockData = bool.fromEnvironment(
     'USE_MOCK',
-    defaultValue: false,
+    defaultValue: true,
   );
 
   static const String sectors = '/api/v1/sectors';

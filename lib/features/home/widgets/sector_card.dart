@@ -10,11 +10,7 @@ class SectorCard extends StatelessWidget {
   final SectorModel sector;
   final VoidCallback onTap;
 
-  const SectorCard({
-    super.key,
-    required this.sector,
-    required this.onTap,
-  });
+  const SectorCard({super.key, required this.sector, required this.onTap});
 
   @override
   Widget build(BuildContext context) {
@@ -35,7 +31,7 @@ class SectorCard extends StatelessWidget {
                     width: 40,
                     height: 40,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => const AppIconBox(
+                    errorBuilder: (_, _, _) => const AppIconBox(
                       icon: Icons.category,
                       color: AppColors.primary,
                       backgroundColor: Color(0x1F0055C7),
@@ -65,10 +61,7 @@ class SectorCard extends StatelessWidget {
                   ],
                 ),
               ),
-              const Icon(
-                Icons.chevron_right,
-                color: AppColors.secondaryText,
-              ),
+              const Icon(Icons.chevron_right, color: AppColors.secondaryText),
             ],
           ),
         ),

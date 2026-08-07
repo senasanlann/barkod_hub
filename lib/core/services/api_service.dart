@@ -67,8 +67,16 @@ class ApiService {
     final csvProducts = await _loadCsvProducts();
     for (final product in csvProducts) {
       if (product['barcode']?.toString().trim() == barcode) {
-        final model = ProductModel.fromJson(product);
+        var model = ProductModel.fromJson(product);
         if (model.name != null && model.name!.trim().isNotEmpty) {
+          if (model.imageUrl == null ||
+              model.imageUrl!.trim().isEmpty ||
+              model.imageUrl == 'bilinmiyor') {
+            final offImage = await _fetchOffImage(barcode);
+            if (offImage != null && offImage.isNotEmpty) {
+              model = model.copyWith(imageUrl: offImage);
+            }
+          }
           return model;
         }
       }
@@ -136,6 +144,24 @@ class ApiService {
       'barcode': barcode,
       'status': 'Ürün bulunamadı',
     });
+  }
+
+  Future<String?> _fetchOffImage(String barcode) async {
+    try {
+      final offUrl =
+          '${ApiConstants.offBaseUrl}${ApiConstants.offProductPath}/$barcode.json';
+      final response = await client.get(
+        offUrl,
+        queryParameters: {'fields': 'image_url'},
+      );
+      if (response is Map && response['product'] is Map) {
+        final img = response['product']['image_url']?.toString().trim();
+        if (img != null && img.isNotEmpty && img != 'bilinmiyor') {
+          return img;
+        }
+      }
+    } catch (_) {}
+    return null;
   }
 
   Future<bool> postScanLog(String barcode, String status) async {

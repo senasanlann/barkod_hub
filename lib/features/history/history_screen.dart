@@ -89,11 +89,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
           label: 'Bulunamadı',
         );
       default:
-        return (
-          icon: Icons.error_outline,
-          color: Colors.red,
-          label: 'Hata',
-        );
+        return (icon: Icons.error_outline, color: Colors.red, label: 'Hata');
     }
   }
 
@@ -137,8 +133,7 @@ class _HistoryScreenState extends State<HistoryScreen> {
             return ListView.separated(
               padding: const EdgeInsets.all(AppSpacing.lg),
               itemCount: history.length,
-              separatorBuilder: (_, _) =>
-                  const SizedBox(height: AppSpacing.sm),
+              separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.sm),
               itemBuilder: (context, index) {
                 final entry = history[index];
                 final meta = _statusMeta(entry.status);
@@ -146,7 +141,8 @@ class _HistoryScreenState extends State<HistoryScreen> {
                 return AppCard(
                   child: Row(
                     children: [
-                      if (entry.imageUrl != null && entry.imageUrl!.trim().isNotEmpty)
+                      if (entry.imageUrl != null &&
+                          entry.imageUrl!.trim().isNotEmpty)
                         ClipRRect(
                           borderRadius: BorderRadius.circular(8),
                           child: Image.network(
@@ -154,10 +150,12 @@ class _HistoryScreenState extends State<HistoryScreen> {
                             width: 44,
                             height: 44,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => AppIconBox(
+                            errorBuilder: (_, _, _) => AppIconBox(
                               icon: meta.icon,
                               color: meta.color,
-                              backgroundColor: meta.color.withValues(alpha: 0.12),
+                              backgroundColor: meta.color.withValues(
+                                alpha: 0.12,
+                              ),
                             ),
                           ),
                         )

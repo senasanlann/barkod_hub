@@ -54,14 +54,17 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
   }
 
   Future<void> _checkSectorFav() async {
-    final fav = await ServiceLocator.offlineCacheService.isFavoriteSector(widget.sector.id);
+    final fav = await ServiceLocator.offlineCacheService.isFavoriteSector(
+      widget.sector.id,
+    );
     if (mounted) {
       setState(() => _isSectorFav = fav);
     }
   }
 
   Future<void> _toggleSectorFav() async {
-    final newlyAdded = await ServiceLocator.offlineCacheService.toggleFavoriteSector(widget.sector.id);
+    final newlyAdded = await ServiceLocator.offlineCacheService
+        .toggleFavoriteSector(widget.sector.id);
     if (mounted) {
       setState(() => _isSectorFav = newlyAdded);
       ScaffoldMessenger.of(context).showSnackBar(
@@ -308,7 +311,9 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
               _isSectorFav ? Icons.favorite : Icons.favorite_border,
               color: _isSectorFav ? Colors.red : null,
             ),
-            tooltip: _isSectorFav ? 'Sektör Favorilerden Çıkar' : 'Sektörü Favorile',
+            tooltip: _isSectorFav
+                ? 'Sektör Favorilerden Çıkar'
+                : 'Sektörü Favorile',
             onPressed: _toggleSectorFav,
           ),
         ],
@@ -343,7 +348,8 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
                     if (snapshot.connectionState == ConnectionState.waiting) {
                       return ListView.separated(
                         itemCount: 4,
-                        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                        separatorBuilder: (_, _) =>
+                            const SizedBox(height: AppSpacing.sm),
                         itemBuilder: (context, index) => const AppSkeleton(
                           width: double.infinity,
                           height: 72,
@@ -444,7 +450,10 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
                           Text(
                             'Versiyon: ${list.version} • Son Güncelleme: 07.08.2026',
                             style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: AppColors.secondaryText, fontWeight: FontWeight.bold),
+                                ?.copyWith(
+                                  color: AppColors.secondaryText,
+                                  fontWeight: FontWeight.bold,
+                                ),
                           ),
                         ],
                         if (list != null && list.exportLinks.isNotEmpty) ...[
@@ -472,7 +481,9 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
                                         Icons.download_outlined,
                                         size: 16,
                                       ),
-                                label: Text('${format.toUpperCase()} ($sizeEstimate)'),
+                                label: Text(
+                                  '${format.toUpperCase()} ($sizeEstimate)',
+                                ),
                                 onPressed:
                                     isDownloading || filteredProducts.isEmpty
                                     ? null

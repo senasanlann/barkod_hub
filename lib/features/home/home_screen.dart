@@ -103,60 +103,6 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  void _showRoleSwitcherDialog() {
-    showDialog(
-      context: context,
-      builder: (dialogContext) {
-        return SimpleDialog(
-          title: const Text('Hızlı Rol Değiştir'),
-          children: [
-            SimpleDialogOption(
-              onPressed: () async {
-                Navigator.pop(dialogContext);
-                await ServiceLocator.authService.logout();
-                await _loadUser();
-              },
-              child: const Text('Misafir (Guest)'),
-            ),
-            SimpleDialogOption(
-              onPressed: () async {
-                Navigator.pop(dialogContext);
-                await ServiceLocator.authService.login(
-                  'user@bilsoft.com',
-                  '123',
-                );
-                await _loadUser();
-              },
-              child: const Text('Kayıtlı Kullanıcı (User)'),
-            ),
-            SimpleDialogOption(
-              onPressed: () async {
-                Navigator.pop(dialogContext);
-                await ServiceLocator.authService.login(
-                  'editor@bilsoft.com',
-                  '123',
-                );
-                await _loadUser();
-              },
-              child: const Text('Editör (Editor)'),
-            ),
-            SimpleDialogOption(
-              onPressed: () async {
-                Navigator.pop(dialogContext);
-                await ServiceLocator.authService.login(
-                  'admin@bilsoft.com',
-                  '123',
-                );
-                await _loadUser();
-              },
-              child: const Text('Yönetici (Admin)'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
   Widget _buildUserHeader(UserModel user) {
     return Container(
       padding: const EdgeInsets.symmetric(
@@ -188,9 +134,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 Text(
                   user.role.displayName,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.primary,
-                        fontWeight: FontWeight.w600,
-                      ),
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ],
             ),
@@ -260,9 +206,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       Expanded(
                         child: Text(
                           '$_pendingCount öneri gönderilmeyi bekliyor',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodyMedium
+                          style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 color: AppColors.primary,
                                 fontWeight: FontWeight.w600,
@@ -325,10 +269,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 icon: Icons.history,
                 variant: AppButtonVariant.outline,
                 onPressed: () {
-                  _checkPermissionAndNavigate(
-                    AppRoutes.history,
-                    'Geçmiş',
-                  );
+                  _checkPermissionAndNavigate(AppRoutes.history, 'Geçmiş');
                 },
               ),
 

@@ -46,8 +46,9 @@ class _ProductResultCardState extends State<ProductResultCard> {
   }
 
   Future<void> _checkFavorite() async {
-    final fav =
-        await ServiceLocator.favoritesService.isFavorite(widget.product.barcode);
+    final fav = await ServiceLocator.favoritesService.isFavorite(
+      widget.product.barcode,
+    );
     if (mounted) {
       setState(() {
         _isFav = fav;
@@ -66,8 +67,9 @@ class _ProductResultCardState extends State<ProductResultCard> {
       return;
     }
 
-    final newlyAdded =
-        await ServiceLocator.favoritesService.toggleFavorite(widget.product);
+    final newlyAdded = await ServiceLocator.favoritesService.toggleFavorite(
+      widget.product,
+    );
     if (!mounted) return;
 
     setState(() {
@@ -151,206 +153,209 @@ class _ProductResultCardState extends State<ProductResultCard> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-          Row(
-            children: [
-              const AppIconBox(
-                icon: Icons.inventory_2,
-                color: AppColors.primary,
-                backgroundColor: Color(0x1F0055C7),
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: Text(
-                  'Sorgu Sonucu',
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              IconButton(
-                icon: const Icon(Icons.share_outlined),
-                onPressed: () {
-                  Share.share(
-                    '${product.name ?? "Ürün"} - Barkod: ${product.barcode}\n'
-                    'BarkodHub uygulamasından sorgulandı.',
-                  );
-                },
-                tooltip: 'Ürün Paylaş',
-              ),
-              IconButton(
-                icon: Icon(
-                  _isFav ? Icons.favorite : Icons.favorite_border,
-                  color: _isFav ? Colors.red : AppColors.secondaryText,
-                ),
-                onPressed: _toggleFavorite,
-                tooltip: _isFav ? 'Favorilerden Çıkar' : 'Favorilere Ekle',
-              ),
-            ],
-          ),
-          const SizedBox(height: AppSpacing.md),
-          _buildImage(context),
-          const SizedBox(height: AppSpacing.md),
-          if (_hasValue(product.name)) ...[
-            Text(
-              product.name!,
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.primaryText,
-                  ),
-            ),
-            const SizedBox(height: AppSpacing.xs),
-          ],
-          if (_hasValue(product.barcode)) ...[
-            InkWell(
-              onTap: () {
-                Clipboard.setData(ClipboardData(text: product.barcode!));
-                AppSnackBar.showSuccess(
-                  context,
-                  'Barkod kopyalandı: ${product.barcode}',
-                );
-              },
-              borderRadius: BorderRadius.circular(8),
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
-                decoration: BoxDecoration(
-                  color: AppColors.background,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: AppColors.border),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Icon(
-                      Icons.qr_code_2_outlined,
-                      size: 18,
-                      color: AppColors.primary,
-                    ),
-                    const SizedBox(width: 6),
-                    Text(
-                      product.barcode!,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.bold,
-                        fontSize: 14,
-                      ),
-                    ),
-                    const SizedBox(width: 6),
-                    const Icon(
-                      Icons.copy_outlined,
-                      size: 14,
-                      color: AppColors.secondaryText,
-                    ),
-                    const SizedBox(width: 8),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 6,
-                        vertical: 2,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.1),
-                        borderRadius: BorderRadius.circular(4),
-                      ),
-                      child: Text(
-                        _barcodeTypeLabel(product.barcode!),
-                        style: const TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: AppSpacing.sm),
-          ],
-          if (_hasValue(product.brand) || _hasValue(product.category)) ...[
-            Wrap(
-              spacing: AppSpacing.xs,
-              runSpacing: AppSpacing.xs,
+            Row(
               children: [
-                if (_hasValue(product.brand))
-                  Chip(
-                    avatar: const Icon(
-                      Icons.branding_watermark_outlined,
-                      size: 14,
-                      color: AppColors.primary,
-                    ),
-                    label: Text(product.brand!),
-                    backgroundColor: AppColors.card,
-                    side: const BorderSide(color: AppColors.border),
+                const AppIconBox(
+                  icon: Icons.inventory_2,
+                  color: AppColors.primary,
+                  backgroundColor: Color(0x1F0055C7),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Text(
+                    'Sorgu Sonucu',
+                    style: Theme.of(context).textTheme.titleMedium,
                   ),
-                if (_hasValue(product.category))
-                  Chip(
-                    avatar: const Icon(
-                      Icons.category_outlined,
-                      size: 14,
-                      color: AppColors.primary,
-                    ),
-                    label: Text(product.category!),
-                    backgroundColor: AppColors.card,
-                    side: const BorderSide(color: AppColors.border),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.share_outlined),
+                  onPressed: () {
+                    Share.share(
+                      '${product.name ?? "Ürün"} - Barkod: ${product.barcode}\n'
+                      'BarkodHub uygulamasından sorgulandı.',
+                    );
+                  },
+                  tooltip: 'Ürün Paylaş',
+                ),
+                IconButton(
+                  icon: Icon(
+                    _isFav ? Icons.favorite : Icons.favorite_border,
+                    color: _isFav ? Colors.red : AppColors.secondaryText,
                   ),
-                if (_hasValue(product.sector))
-                  Chip(
-                    avatar: const Icon(
-                      Icons.dashboard_outlined,
-                      size: 14,
-                      color: AppColors.primary,
-                    ),
-                    label: Text(product.sector!),
-                    backgroundColor: AppColors.card,
-                    side: const BorderSide(color: AppColors.border),
-                  ),
+                  onPressed: _toggleFavorite,
+                  tooltip: _isFav ? 'Favorilerden Çıkar' : 'Favorilere Ekle',
+                ),
               ],
             ),
-            const SizedBox(height: AppSpacing.xs),
-          ],
-          _buildPriceBlock(context),
-          if (detailEntries.isNotEmpty) ...[
-            const SizedBox(height: AppSpacing.xs),
-            const Divider(color: AppColors.border),
-            const SizedBox(height: AppSpacing.xs),
-            Text('Detaylar', style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: AppSpacing.sm),
-            ...detailEntries.map(
-              (entry) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: _ResultRow(
-                  label: entry.key.toString(),
-                  value: entry.value?.toString() ?? '-',
+            const SizedBox(height: AppSpacing.md),
+            _buildImage(context),
+            const SizedBox(height: AppSpacing.md),
+            if (_hasValue(product.name)) ...[
+              Text(
+                product.name!,
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                  fontWeight: FontWeight.bold,
+                  color: AppColors.primaryText,
                 ),
               ),
-            ),
-          ],
-          const SizedBox(height: AppSpacing.xs),
-          const Divider(color: AppColors.border),
-          const SizedBox(height: AppSpacing.sm),
-          Row(
-            children: [
-              Expanded(
-                child: AppButton(
-                  text: 'Hata Bildir',
-                  icon: Icons.report_problem_outlined,
-                  variant: AppButtonVariant.outline,
-                  onPressed: () =>
-                      _handleReportAction('Hatalı / Eksik Bilgi Bildir'),
+              const SizedBox(height: AppSpacing.xs),
+            ],
+            if (_hasValue(product.barcode)) ...[
+              InkWell(
+                onTap: () {
+                  Clipboard.setData(ClipboardData(text: product.barcode!));
+                  AppSnackBar.showSuccess(
+                    context,
+                    'Barkod kopyalandı: ${product.barcode}',
+                  );
+                },
+                borderRadius: BorderRadius.circular(8),
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 10,
+                    vertical: 6,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.background,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: AppColors.border),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      const Icon(
+                        Icons.qr_code_2_outlined,
+                        size: 18,
+                        color: AppColors.primary,
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        product.barcode!,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          fontSize: 14,
+                        ),
+                      ),
+                      const SizedBox(width: 6),
+                      const Icon(
+                        Icons.copy_outlined,
+                        size: 14,
+                        color: AppColors.secondaryText,
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 6,
+                          vertical: 2,
+                        ),
+                        decoration: BoxDecoration(
+                          color: AppColors.primary.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(4),
+                        ),
+                        child: Text(
+                          _barcodeTypeLabel(product.barcode!),
+                          style: const TextStyle(
+                            fontSize: 10,
+                            fontWeight: FontWeight.bold,
+                            color: AppColors.primary,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-              const SizedBox(width: AppSpacing.sm),
-              Expanded(
-                child: AppButton(
-                  text: 'Düzenle',
-                  icon: Icons.edit_note_outlined,
-                  variant: AppButtonVariant.outline,
-                  onPressed: _handleSuggestAction,
+              const SizedBox(height: AppSpacing.sm),
+            ],
+            if (_hasValue(product.brand) || _hasValue(product.category)) ...[
+              Wrap(
+                spacing: AppSpacing.xs,
+                runSpacing: AppSpacing.xs,
+                children: [
+                  if (_hasValue(product.brand))
+                    Chip(
+                      avatar: const Icon(
+                        Icons.branding_watermark_outlined,
+                        size: 14,
+                        color: AppColors.primary,
+                      ),
+                      label: Text(product.brand!),
+                      backgroundColor: AppColors.card,
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                  if (_hasValue(product.category))
+                    Chip(
+                      avatar: const Icon(
+                        Icons.category_outlined,
+                        size: 14,
+                        color: AppColors.primary,
+                      ),
+                      label: Text(product.category!),
+                      backgroundColor: AppColors.card,
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                  if (_hasValue(product.sector))
+                    Chip(
+                      avatar: const Icon(
+                        Icons.dashboard_outlined,
+                        size: 14,
+                        color: AppColors.primary,
+                      ),
+                      label: Text(product.sector!),
+                      backgroundColor: AppColors.card,
+                      side: const BorderSide(color: AppColors.border),
+                    ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+            ],
+            _buildPriceBlock(context),
+            if (detailEntries.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.xs),
+              const Divider(color: AppColors.border),
+              const SizedBox(height: AppSpacing.xs),
+              Text('Detaylar', style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: AppSpacing.sm),
+              ...detailEntries.map(
+                (entry) => Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: _ResultRow(
+                    label: entry.key.toString(),
+                    value: entry.value?.toString() ?? '-',
+                  ),
                 ),
               ),
             ],
-          ),
-        ],
+            const SizedBox(height: AppSpacing.xs),
+            const Divider(color: AppColors.border),
+            const SizedBox(height: AppSpacing.sm),
+            Row(
+              children: [
+                Expanded(
+                  child: AppButton(
+                    text: 'Hata Bildir',
+                    icon: Icons.report_problem_outlined,
+                    variant: AppButtonVariant.outline,
+                    onPressed: () =>
+                        _handleReportAction('Hatalı / Eksik Bilgi Bildir'),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: AppButton(
+                    text: 'Düzenle',
+                    icon: Icons.edit_note_outlined,
+                    variant: AppButtonVariant.outline,
+                    onPressed: _handleSuggestAction,
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
-    ),
     );
   }
 
@@ -593,13 +598,6 @@ class _ProductResultCardState extends State<ProductResultCard> {
     if (len == 14) return 'GTIN-14';
     return 'Barkod';
   }
-}
-
-class _ResultRowData {
-  final String label;
-  final String value;
-
-  const _ResultRowData({required this.label, required this.value});
 }
 
 class _ResultRow extends StatelessWidget {

@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 
 import '../../core/di/service_locator.dart';
-import '../../core/routes/app_routes.dart';
 import '../../core/theme/app_colors.dart';
 import '../../core/theme/app_spacing.dart';
 import '../../shared/widgets/app_button.dart';
@@ -96,7 +95,10 @@ class _SettingsScreenState extends State<SettingsScreen> {
     await ServiceLocator.authService.logout();
     await _loadUser();
     if (mounted) {
-      AppSnackBar.showSuccess(context, 'Oturum kapatıldı, misafir moduna geçildi.');
+      AppSnackBar.showSuccess(
+        context,
+        'Oturum kapatıldı, misafir moduna geçildi.',
+      );
     }
   }
 
@@ -138,9 +140,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                           Text(
                             user.email,
-                            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                  color: AppColors.secondaryText,
-                                ),
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.secondaryText),
                           ),
                           const SizedBox(height: AppSpacing.xs),
                           Container(
@@ -186,7 +187,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                   Row(
                     children: [
                       Icon(
-                        _apiIsHealthy ? Icons.check_circle : Icons.error_outline,
+                        _apiIsHealthy
+                            ? Icons.check_circle
+                            : Icons.error_outline,
                         color: _apiIsHealthy ? Colors.green : Colors.orange,
                       ),
                       const SizedBox(width: AppSpacing.sm),
@@ -200,9 +203,8 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ),
                             Text(
                               _apiStatusText,
-                              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    color: AppColors.secondaryText,
-                                  ),
+                              style: Theme.of(context).textTheme.bodySmall
+                                  ?.copyWith(color: AppColors.secondaryText),
                             ),
                           ],
                         ),
@@ -212,7 +214,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
                             ? const SizedBox(
                                 width: 18,
                                 height: 18,
-                                child: CircularProgressIndicator(strokeWidth: 2),
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                ),
                               )
                             : const Icon(Icons.refresh, size: 20),
                         onPressed: _checkApiStatus,
@@ -252,9 +256,14 @@ class _SettingsScreenState extends State<SettingsScreen> {
             AppCard(
               child: ListTile(
                 contentPadding: EdgeInsets.zero,
-                leading: const Icon(Icons.gavel_outlined, color: AppColors.primary),
+                leading: const Icon(
+                  Icons.gavel_outlined,
+                  color: AppColors.primary,
+                ),
                 title: const Text('KVKK Aydınlatma Metni'),
-                subtitle: const Text('Kişisel verilerin işlenmesi ve gizlilik ilkeleri'),
+                subtitle: const Text(
+                  'Kişisel verilerin işlenmesi ve gizlilik ilkeleri',
+                ),
                 trailing: const Icon(Icons.chevron_right),
                 onTap: () {
                   showDialog(

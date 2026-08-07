@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 
 import '../di/service_locator.dart';
+import 'api_constants.dart';
 
 class AuthInterceptor extends Interceptor {
   @override
@@ -10,7 +11,8 @@ class AuthInterceptor extends Interceptor {
   ) async {
     try {
       final user = await ServiceLocator.authService.getCurrentUser();
-      if (user.token != null && user.token!.isNotEmpty) {
+      final isOwnApi = options.uri.toString().startsWith(ApiConstants.baseUrl);
+      if (isOwnApi && user.token != null && user.token!.isNotEmpty) {
         options.headers['Authorization'] = 'Bearer ${user.token}';
       }
     } catch (_) {

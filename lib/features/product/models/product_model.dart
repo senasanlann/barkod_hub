@@ -23,6 +23,32 @@ class ProductModel {
     this.updatedAt,
   });
 
+  ProductModel copyWith({
+    String? id,
+    String? barcode,
+    String? name,
+    String? brand,
+    String? sector,
+    String? category,
+    double? price,
+    String? imageUrl,
+    String? updatedAt,
+    Map<String, dynamic>? rawData,
+  }) {
+    return ProductModel(
+      rawData: rawData ?? this.rawData,
+      id: id ?? this.id,
+      barcode: barcode ?? this.barcode,
+      name: name ?? this.name,
+      brand: brand ?? this.brand,
+      sector: sector ?? this.sector,
+      category: category ?? this.category,
+      price: price ?? this.price,
+      imageUrl: imageUrl ?? this.imageUrl,
+      updatedAt: updatedAt ?? this.updatedAt,
+    );
+  }
+
   factory ProductModel.fromJson(Map<String, dynamic> json) {
     return ProductModel(
       rawData: json,
