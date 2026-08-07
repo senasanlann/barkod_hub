@@ -94,12 +94,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
 
   Future<void> _logout() async {
     await ServiceLocator.authService.logout();
+    await _loadUser();
     if (mounted) {
-      Navigator.pushNamedAndRemoveUntil(
-        context,
-        AppRoutes.welcomeAuth,
-        (route) => false,
-      );
+      AppSnackBar.showSuccess(context, 'Oturum kapatıldı, misafir moduna geçildi.');
     }
   }
 
@@ -244,6 +241,42 @@ class _SettingsScreenState extends State<SettingsScreen> {
                     onTap: _clearCache,
                   ),
                 ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Yasal & Gizlilik',
+              style: Theme.of(context).textTheme.titleSmall,
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            AppCard(
+              child: ListTile(
+                contentPadding: EdgeInsets.zero,
+                leading: const Icon(Icons.gavel_outlined, color: AppColors.primary),
+                title: const Text('KVKK Aydınlatma Metni'),
+                subtitle: const Text('Kişisel verilerin işlenmesi ve gizlilik ilkeleri'),
+                trailing: const Icon(Icons.chevron_right),
+                onTap: () {
+                  showDialog(
+                    context: context,
+                    builder: (dialogCtx) => AlertDialog(
+                      title: const Text('KVKK Aydınlatma Metni'),
+                      content: const SingleChildScrollView(
+                        child: Text(
+                          '6698 Sayılı KVKK kapsamında, BarkodHub uygulaması kişisel verilerinizi '
+                          'yalnızca ürün arama, tarama geçmişi ve üyelik işlemleriyle sınırlı olarak '
+                          'güvenli altyapıda işlemektedir. Verileriniz 3. şahıslarla paylaşılmaz.',
+                        ),
+                      ),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(dialogCtx),
+                          child: const Text('Tamam'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
               ),
             ),
             const SizedBox(height: AppSpacing.xl),

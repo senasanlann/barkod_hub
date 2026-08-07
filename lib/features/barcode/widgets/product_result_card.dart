@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:share_plus/share_plus.dart';
 
 import '../../../core/di/service_locator.dart';
 import '../../../core/routes/app_routes.dart';
@@ -127,7 +129,7 @@ class _ProductResultCardState extends State<ProductResultCard> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
-                Navigator.pushNamed(context, AppRoutes.login);
+                Navigator.pushNamed(context, AppRoutes.welcomeAuth);
               },
               child: const Text('Giriş Yap'),
             ),
@@ -140,24 +142,15 @@ class _ProductResultCardState extends State<ProductResultCard> {
   @override
   Widget build(BuildContext context) {
     final product = widget.product;
-    final primaryRows = <_ResultRowData>[
-      if (_hasValue(product.name))
-        _ResultRowData(label: 'Ürün Adı', value: product.name!),
-      if (_hasValue(product.brand))
-        _ResultRowData(label: 'Marka', value: product.brand!),
-      if (_hasValue(product.category))
-        _ResultRowData(label: 'Kategori', value: product.category!),
-      if (_hasValue(product.barcode))
-        _ResultRowData(label: 'Barkod', value: product.barcode!),
-    ];
     final detailEntries = product.rawData.entries
         .where((entry) => !_isPrimaryKey(entry.key))
         .toList();
 
     return AppCard(
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
+      child: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
           Row(
             children: [
               const AppIconBox(
@@ -173,29 +166,146 @@ class _ProductResultCardState extends State<ProductResultCard> {
                 ),
               ),
               IconButton(
+                icon: const Icon(Icons.share_outlined),
+                onPressed: () {
+                  Share.share(
+                    '${product.name ?? "Ürün"} - Barkod: ${product.barcode}\n'
+                    'BarkodHub uygulamasından sorgulandı.',
+                  );
+                },
+                tooltip: 'Ürün Paylaş',
+              ),
+              IconButton(
                 icon: Icon(
                   _isFav ? Icons.favorite : Icons.favorite_border,
                   color: _isFav ? Colors.red : AppColors.secondaryText,
                 ),
                 onPressed: _toggleFavorite,
+                tooltip: _isFav ? 'Favorilerden Çıkar' : 'Favorilere Ekle',
               ),
             ],
           ),
           const SizedBox(height: AppSpacing.md),
           _buildImage(context),
           const SizedBox(height: AppSpacing.md),
-          if (primaryRows.isNotEmpty) ...[
-            ...primaryRows.map(
-              (row) => Padding(
-                padding: const EdgeInsets.only(bottom: AppSpacing.sm),
-                child: _ResultRow(label: row.label, value: row.value),
+          if (_hasValue(product.name)) ...[
+            Text(
+              product.name!,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.primaryText,
+                  ),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+          ],
+          if (_hasValue(product.barcode)) ...[
+            InkWell(
+              onTap: () {
+                Clipboard.setData(ClipboardData(text: product.barcode!));
+                AppSnackBar.showSuccess(
+                  context,
+                  'Barkod kopyalandı: ${product.barcode}',
+                );
+              },
+              borderRadius: BorderRadius.circular(8),
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                decoration: BoxDecoration(
+                  color: AppColors.background,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: AppColors.border),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.qr_code_2_outlined,
+                      size: 18,
+                      color: AppColors.primary,
+                    ),
+                    const SizedBox(width: 6),
+                    Text(
+                      product.barcode!,
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        fontSize: 14,
+                      ),
+                    ),
+                    const SizedBox(width: 6),
+                    const Icon(
+                      Icons.copy_outlined,
+                      size: 14,
+                      color: AppColors.secondaryText,
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 6,
+                        vertical: 2,
+                      ),
+                      decoration: BoxDecoration(
+                        color: AppColors.primary.withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(4),
+                      ),
+                      child: Text(
+                        _barcodeTypeLabel(product.barcode!),
+                        style: const TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.primary,
+                        ),
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
-          ] else if (detailEntries.isEmpty)
-            Text(
-              'Ürün bilgisi bulunamadı.',
-              style: Theme.of(context).textTheme.bodyMedium,
+            const SizedBox(height: AppSpacing.sm),
+          ],
+          if (_hasValue(product.brand) || _hasValue(product.category)) ...[
+            Wrap(
+              spacing: AppSpacing.xs,
+              runSpacing: AppSpacing.xs,
+              children: [
+                if (_hasValue(product.brand))
+                  Chip(
+                    avatar: const Icon(
+                      Icons.branding_watermark_outlined,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                    label: Text(product.brand!),
+                    backgroundColor: AppColors.card,
+                    side: const BorderSide(color: AppColors.border),
+                  ),
+                if (_hasValue(product.category))
+                  Chip(
+                    avatar: const Icon(
+                      Icons.category_outlined,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                    label: Text(product.category!),
+                    backgroundColor: AppColors.card,
+                    side: const BorderSide(color: AppColors.border),
+                  ),
+                if (_hasValue(product.sector))
+                  Chip(
+                    avatar: const Icon(
+                      Icons.dashboard_outlined,
+                      size: 14,
+                      color: AppColors.primary,
+                    ),
+                    label: Text(product.sector!),
+                    backgroundColor: AppColors.card,
+                    side: const BorderSide(color: AppColors.border),
+                  ),
+              ],
             ),
+            const SizedBox(height: AppSpacing.xs),
+          ],
           _buildPriceBlock(context),
           if (detailEntries.isNotEmpty) ...[
             const SizedBox(height: AppSpacing.xs),
@@ -230,7 +340,7 @@ class _ProductResultCardState extends State<ProductResultCard> {
               const SizedBox(width: AppSpacing.sm),
               Expanded(
                 child: AppButton(
-                  text: 'Ürün Düzenle',
+                  text: 'Düzenle',
                   icon: Icons.edit_note_outlined,
                   variant: AppButtonVariant.outline,
                   onPressed: _handleSuggestAction,
@@ -240,6 +350,7 @@ class _ProductResultCardState extends State<ProductResultCard> {
           ),
         ],
       ),
+    ),
     );
   }
 
@@ -463,7 +574,24 @@ class _ProductResultCardState extends State<ProductResultCard> {
         k == 'updated_at' ||
         k == 'createdat' ||
         k == 'created_at' ||
-        k == 'lastupdate';
+        k == 'lastupdate' ||
+        k == 'sector' ||
+        k == 'sektor' ||
+        k == 'status' ||
+        k == 'id' ||
+        k == 'download' ||
+        k == 'vat' ||
+        k == 'kdv' ||
+        k == 'tax';
+  }
+
+  String _barcodeTypeLabel(String barcode) {
+    final len = barcode.length;
+    if (len == 8) return 'EAN-8';
+    if (len == 12) return 'UPC-A';
+    if (len == 13) return 'EAN-13';
+    if (len == 14) return 'GTIN-14';
+    return 'Barkod';
   }
 }
 

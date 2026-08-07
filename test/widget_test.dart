@@ -28,10 +28,12 @@ void main() {
 }
 
 class _FakeApiService extends ApiService {
-  _FakeApiService() : super(client: ApiClient());
+  _FakeApiService() : super(client: _FakeApiClient());
 
   @override
   Future<List<SectorModel>> getSectors() async {
     return const [];
   }
 }
+
+class _FakeApiClient extends ApiClient {}

@@ -14,7 +14,7 @@ class AuthService {
   static const String _guestQueryCountKey = 'auth_guest_query_count';
   static const String _guestQueryDateKey = 'auth_guest_query_date';
 
-  static const int maxGuestDailyQueries = 10;
+  static const int maxGuestDailyQueries = 50;
 
   Future<UserModel> getCurrentUser() async {
     final prefs = await _preferences;

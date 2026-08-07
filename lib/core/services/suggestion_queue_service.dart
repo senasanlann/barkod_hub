@@ -45,19 +45,34 @@ class SuggestionQueueService {
   }
 
   Future<void> markSynced(String id) async {
-    final prefs = await _preferences;
-    final all = await getAll();
-    final updated = all.map((item) {
-      if (item.id == id) {
-        return item.copyWith(syncStatus: 'synced');
-      }
-      return item;
-    }).toList();
+    await remove(id);
+  }
 
-    await prefs.setStringList(
-      _queueKey,
-      updated.map((item) => jsonEncode(item.toJson())).toList(),
-    );
+  Future<int> processPendingQueue(dynamic apiService) async {
+    final pending = await getPending();
+    int syncedCount = 0;
+
+    for (final item in pending) {
+      bool sent = false;
+      try {
+        if (item.type == 'image_report') {
+          sent = await apiService.postImageReport(item);
+        } else {
+          sent = await apiService.postProductSuggestion(item);
+        }
+      } catch (_) {
+        sent = false;
+      }
+
+      if (sent) {
+        await remove(item.id);
+        syncedCount++;
+      } else {
+        await markFailed(item.id);
+      }
+    }
+
+    return syncedCount;
   }
 
   Future<void> markFailed(String id) async {

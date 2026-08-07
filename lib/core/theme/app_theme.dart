@@ -8,7 +8,6 @@ class AppTheme {
   static ThemeData get lightTheme {
     return ThemeData(
       useMaterial3: true,
-      fontFamily: 'Manrope',
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
           fontSize: 28,

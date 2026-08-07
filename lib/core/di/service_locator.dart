@@ -7,6 +7,7 @@ import '../services/file_download_service.dart';
 import '../services/local_storage_service.dart';
 import '../services/log_service.dart';
 import '../services/offline_cache_service.dart';
+import '../services/secure_storage_service.dart';
 import '../services/suggestion_queue_service.dart';
 
 class ServiceLocator {
@@ -36,6 +37,8 @@ class ServiceLocator {
   static final LogService logService = LogService();
 
   static final LocalStorageService localStorageService = LocalStorageService();
+
+  static final SecureStorageService secureStorageService = SecureStorageService();
 
   static ApiService? _apiServiceOverride;
 

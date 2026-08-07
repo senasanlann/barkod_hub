@@ -199,7 +199,7 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
             ElevatedButton(
               onPressed: () {
                 Navigator.pop(dialogContext);
-                Navigator.pushNamed(context, AppRoutes.login);
+                Navigator.pushNamed(context, AppRoutes.welcomeAuth);
               },
               child: const Text('Giriş Yap'),
             ),

@@ -21,15 +21,15 @@ void main() {
     expect(user.role, UserRole.guest);
   });
 
-  test('guest daily query limit is enforced at 10 queries', () async {
+  test('guest daily query limit is enforced at 50 queries', () async {
     expect(await service.canPerformGuestQuery(), isTrue);
-    expect(await service.getRemainingGuestQueries(), 10);
+    expect(await service.getRemainingGuestQueries(), 50);
 
-    for (var i = 0; i < 10; i++) {
+    for (var i = 0; i < 50; i++) {
       await service.incrementGuestQueryCount();
     }
 
-    expect(await service.getGuestQueryCount(), 10);
+    expect(await service.getGuestQueryCount(), 50);
     expect(await service.getRemainingGuestQueries(), 0);
     expect(await service.canPerformGuestQuery(), isFalse);
   });

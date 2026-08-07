@@ -430,6 +430,10 @@ class ApiService {
       'imageurl': 'imageUrl',
       'kaynak': 'source',
       'source': 'source',
+      'kdv': 'vat',
+      'kdv oranı': 'vat',
+      'vat': 'vat',
+      'tax': 'vat',
     };
 
     return keys[header];

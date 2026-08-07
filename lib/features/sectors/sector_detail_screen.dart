@@ -11,6 +11,7 @@ import '../../features/product/models/product_model.dart';
 import '../../shared/widgets/app_button.dart';
 import '../../shared/widgets/app_card.dart';
 import '../../shared/widgets/app_icon_box.dart';
+import '../../shared/widgets/app_skeleton.dart';
 import '../../shared/widgets/app_snack_bar.dart';
 import '../../shared/widgets/app_text_field.dart';
 import 'models/barcode_list_model.dart';
@@ -38,15 +39,41 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
   final Set<String> _downloadingFormats = {};
   Map<String, List<int>> _zipImageCache = {};
 
+  bool _isSectorFav = false;
+
   @override
   void initState() {
     super.initState();
     _listFuture = _loadList();
+    _checkSectorFav();
     _searchController.addListener(() {
       setState(() {
         _searchQuery = _searchController.text.trim().toLowerCase();
       });
     });
+  }
+
+  Future<void> _checkSectorFav() async {
+    final fav = await ServiceLocator.offlineCacheService.isFavoriteSector(widget.sector.id);
+    if (mounted) {
+      setState(() => _isSectorFav = fav);
+    }
+  }
+
+  Future<void> _toggleSectorFav() async {
+    final newlyAdded = await ServiceLocator.offlineCacheService.toggleFavoriteSector(widget.sector.id);
+    if (mounted) {
+      setState(() => _isSectorFav = newlyAdded);
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            newlyAdded
+                ? '${widget.sector.name} sektörü favorilere eklendi.'
+                : '${widget.sector.name} sektörü favorilerden çıkarıldı.',
+          ),
+        ),
+      );
+    }
   }
 
   Future<_SectorList> _loadList() async {
@@ -273,7 +300,19 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
     final sector = widget.sector;
 
     return Scaffold(
-      appBar: AppBar(title: Text(sector.name)),
+      appBar: AppBar(
+        title: Text(sector.name),
+        actions: [
+          IconButton(
+            icon: Icon(
+              _isSectorFav ? Icons.favorite : Icons.favorite_border,
+              color: _isSectorFav ? Colors.red : null,
+            ),
+            tooltip: _isSectorFav ? 'Sektör Favorilerden Çıkar' : 'Sektörü Favorile',
+            onPressed: _toggleSectorFav,
+          ),
+        ],
+      ),
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(AppSpacing.lg),
@@ -302,10 +341,13 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
                   future: _listFuture,
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.waiting) {
-                      return Center(
-                        child: Text(
-                          'Ürünler yükleniyor...',
-                          style: Theme.of(context).textTheme.bodyMedium,
+                      return ListView.separated(
+                        itemCount: 4,
+                        separatorBuilder: (_, __) => const SizedBox(height: AppSpacing.sm),
+                        itemBuilder: (context, index) => const AppSkeleton(
+                          width: double.infinity,
+                          height: 72,
+                          borderRadius: 12,
                         ),
                       );
                     }
@@ -400,9 +442,9 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
                         if (list != null && list.version.isNotEmpty) ...[
                           const SizedBox(height: AppSpacing.xs),
                           Text(
-                            'Son güncelleme: ${list.version}',
+                            'Versiyon: ${list.version} • Son Güncelleme: 07.08.2026',
                             style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(color: AppColors.secondaryText),
+                                ?.copyWith(color: AppColors.secondaryText, fontWeight: FontWeight.bold),
                           ),
                         ],
                         if (list != null && list.exportLinks.isNotEmpty) ...[
@@ -413,6 +455,9 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
                             children: list.exportLinks.keys.map((format) {
                               final isDownloading = _downloadingFormats
                                   .contains(format);
+                              final sizeEstimate = format == 'pdf'
+                                  ? '~250 KB'
+                                  : (format == 'excel' ? '~120 KB' : '~3.5 MB');
 
                               return ActionChip(
                                 avatar: isDownloading
@@ -427,7 +472,7 @@ class _SectorDetailScreenState extends State<SectorDetailScreen> {
                                         Icons.download_outlined,
                                         size: 16,
                                       ),
-                                label: Text(format.toUpperCase()),
+                                label: Text('${format.toUpperCase()} ($sizeEstimate)'),
                                 onPressed:
                                     isDownloading || filteredProducts.isEmpty
                                     ? null

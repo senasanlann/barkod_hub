@@ -203,4 +203,33 @@ class OfflineCacheService {
       await prefs.remove(key);
     }
   }
+
+  static const String _favSectorsKey = 'cache_fav_sectors';
+
+  Future<List<String>> getFavoriteSectors() async {
+    final prefs = await _preferences;
+    return prefs.getStringList(_favSectorsKey) ?? [];
+  }
+
+  Future<bool> isFavoriteSector(String sectorId) async {
+    final list = await getFavoriteSectors();
+    return list.contains(sectorId);
+  }
+
+  Future<bool> toggleFavoriteSector(String sectorId) async {
+    final prefs = await _preferences;
+    final list = await getFavoriteSectors();
+    final updated = List<String>.from(list);
+
+    bool added = false;
+    if (updated.contains(sectorId)) {
+      updated.remove(sectorId);
+    } else {
+      updated.add(sectorId);
+      added = true;
+    }
+
+    await prefs.setStringList(_favSectorsKey, updated);
+    return added;
+  }
 }

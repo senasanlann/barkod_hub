@@ -27,11 +27,27 @@ class SectorCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           child: Row(
             children: [
-              const AppIconBox(
-                icon: Icons.category,
-                color: AppColors.primary,
-                backgroundColor: Color(0x1F0055C7),
-              ),
+              if (sector.imageUrl != null && sector.imageUrl!.trim().isNotEmpty)
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.network(
+                    sector.imageUrl!,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => const AppIconBox(
+                      icon: Icons.category,
+                      color: AppColors.primary,
+                      backgroundColor: Color(0x1F0055C7),
+                    ),
+                  ),
+                )
+              else
+                const AppIconBox(
+                  icon: Icons.category,
+                  color: AppColors.primary,
+                  backgroundColor: Color(0x1F0055C7),
+                ),
               const SizedBox(width: AppSpacing.md),
               Expanded(
                 child: Column(

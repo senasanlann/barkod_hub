@@ -92,7 +92,7 @@ class _HomeScreenState extends State<HomeScreen> {
             ElevatedButton(
               onPressed: () async {
                 Navigator.pop(dialogContext);
-                await Navigator.pushNamed(context, AppRoutes.login);
+                await Navigator.pushNamed(context, AppRoutes.welcomeAuth);
                 await _loadUser();
               },
               child: const Text('Giriş Yap'),
@@ -170,35 +170,29 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Row(
         children: [
-          IconButton(
-            icon: Icon(
-              user.isRegistered ? Icons.account_circle : Icons.person_outline,
-              color: user.isRegistered
-                  ? AppColors.primary
-                  : AppColors.secondaryText,
-            ),
-            onPressed: _showRoleSwitcherDialog,
-            tooltip: 'Rol Değiştir',
+          Icon(
+            user.isRegistered ? Icons.account_circle : Icons.person_outline,
+            color: user.isRegistered
+                ? AppColors.primary
+                : AppColors.secondaryText,
           ),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: InkWell(
-              onTap: _showRoleSwitcherDialog,
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    user.isRegistered ? user.name : 'Misafir Modu',
-                    style: Theme.of(context).textTheme.titleSmall,
-                  ),
-                  Text(
-                    '${user.role.displayName} (Tıkla Değiştir)',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.primary,
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                ],
-              ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  user.isRegistered ? user.name : 'Misafir Modu',
+                  style: Theme.of(context).textTheme.titleSmall,
+                ),
+                Text(
+                  user.role.displayName,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.primary,
+                        fontWeight: FontWeight.w600,
+                      ),
+                ),
+              ],
             ),
           ),
           TextButton(
@@ -207,7 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 await ServiceLocator.authService.logout();
                 await _loadUser();
               } else {
-                await Navigator.pushNamed(context, AppRoutes.login);
+                await Navigator.pushNamed(context, AppRoutes.welcomeAuth);
                 await _loadUser();
               }
             },

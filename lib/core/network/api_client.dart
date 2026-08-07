@@ -23,11 +23,24 @@ class ApiClient {
 
   Dio get dio => _dio;
 
+  DateTime? _lastRequestTime;
+
+  Future<void> _throttleRequest() async {
+    if (_lastRequestTime != null) {
+      final diff = DateTime.now().difference(_lastRequestTime!);
+      if (diff.inMilliseconds < 150) {
+        await Future.delayed(Duration(milliseconds: 150 - diff.inMilliseconds));
+      }
+    }
+    _lastRequestTime = DateTime.now();
+  }
+
   Future<dynamic> get(
     String path, {
     Map<String, dynamic>? queryParameters,
     Options? options,
   }) async {
+    await _throttleRequest();
     try {
       final response = await _dio.get(
         path,
