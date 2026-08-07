@@ -26,6 +26,7 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
   final MobileScannerController _scannerController = MobileScannerController();
   bool _isProcessing = false;
   bool _isTorchOn = false;
+  bool _hasApiError = false;
   ProductModel? _productResult;
   String? _lastScannedBarcode;
 
@@ -108,6 +109,9 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
       }
     } on ApiException catch (e) {
       await ErrorTracker.trackCameraError(e);
+      setState(() {
+        _hasApiError = true;
+      });
       final cached = await ServiceLocator.offlineCacheService.getCachedProduct(
         barcode,
       );
@@ -170,6 +174,7 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
     setState(() {
       _productResult = null;
       _isProcessing = false;
+      _hasApiError = false;
       _lastScannedBarcode = null;
     });
 
@@ -365,6 +370,49 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
                   'Barkod sorgulanıyor...',
                   textAlign: TextAlign.center,
                   style: Theme.of(context).textTheme.bodyMedium,
+                ),
+              ],
+              if (_hasApiError) ...[
+                const SizedBox(height: AppSpacing.md),
+                Container(
+                  padding: const EdgeInsets.all(AppSpacing.md),
+                  decoration: BoxDecoration(
+                    color: Colors.orange.withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.orange),
+                  ),
+                  child: Column(
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.warning_amber_rounded, color: Colors.orange),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Ağ bağlantısı veya sunucu zaman aşımı oluştu.',
+                              style: TextStyle(fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: AppSpacing.sm),
+                      AppButton(
+                        text: 'Tekrar Dene',
+                        icon: Icons.refresh,
+                        onPressed: () {
+                          if (_lastScannedBarcode != null) {
+                            final bc = _lastScannedBarcode;
+                            setState(() {
+                              _lastScannedBarcode = null;
+                            });
+                            _handleBarcode(bc);
+                          } else {
+                            _restartScanner();
+                          }
+                        },
+                      ),
+                    ],
+                  ),
                 ),
               ],
               if (productResult != null) ...[

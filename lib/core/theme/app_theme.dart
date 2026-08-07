@@ -7,6 +7,7 @@ class AppTheme {
 
   static ThemeData get lightTheme {
     return ThemeData(
+      fontFamily: 'NotoSans',
       useMaterial3: true,
       textTheme: const TextTheme(
         headlineLarge: TextStyle(
