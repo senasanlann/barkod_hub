@@ -4,7 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 void main() {
   group('BarcodeValidator', () {
     test('accepts 8 digit barcode', () {
-      expect(BarcodeValidator.isValid('12345678'), isTrue);
+      expect(BarcodeValidator.isValid('12345670'), isTrue);
     });
 
     test('accepts 12 digit UPC-A barcode', () {
