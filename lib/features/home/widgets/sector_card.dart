@@ -4,7 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../features/sectors/models/sector_model.dart';
 import '../../../shared/widgets/app_card.dart';
-import '../../../shared/widgets/app_icon_box.dart';
+import '../../../shared/widgets/app_sector_emblem.dart';
 
 class SectorCard extends StatelessWidget {
   final SectorModel sector;
@@ -31,18 +31,18 @@ class SectorCard extends StatelessWidget {
                     width: 40,
                     height: 40,
                     fit: BoxFit.cover,
-                    errorBuilder: (_, _, _) => const AppIconBox(
-                      icon: Icons.category,
-                      color: AppColors.primary,
-                      backgroundColor: Color(0x1F0055C7),
+                    errorBuilder: (_, _, _) => AppSectorEmblem(
+                      sector: sector.name,
+                      height: 40,
+                      style: SectorEmblemStyle.compactSquare,
                     ),
                   ),
                 )
               else
-                const AppIconBox(
-                  icon: Icons.category,
-                  color: AppColors.primary,
-                  backgroundColor: Color(0x1F0055C7),
+                AppSectorEmblem(
+                  sector: sector.name,
+                  height: 40,
+                  style: SectorEmblemStyle.compactSquare,
                 ),
               const SizedBox(width: AppSpacing.md),
               Expanded(

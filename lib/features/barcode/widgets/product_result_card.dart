@@ -10,6 +10,7 @@ import '../../../core/theme/app_spacing.dart';
 import '../../../shared/widgets/app_button.dart';
 import '../../../shared/widgets/app_card.dart';
 import '../../../shared/widgets/app_icon_box.dart';
+import '../../../shared/widgets/app_sector_emblem.dart';
 import '../../../shared/widgets/app_snack_bar.dart';
 import '../../product/models/product_model.dart';
 import '../../suggestion/models/suggestion_model.dart';
@@ -455,38 +456,12 @@ class _ProductResultCardState extends State<ProductResultCard> {
   }
 
   Widget _placeholder(BuildContext context) {
-    return ClipRRect(
-      borderRadius: AppRadius.radiusMd,
-      child: Container(
-        height: 200,
-        width: double.infinity,
-        color: AppColors.background,
-        padding: const EdgeInsets.all(AppSpacing.sm),
-        child: Center(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.image_not_supported_outlined,
-                size: 40,
-                color: AppColors.secondaryText,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              const Text(
-                'Görsel bulunamadı',
-                style: TextStyle(color: AppColors.secondaryText),
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              AppButton(
-                text: 'Görsel Bildir',
-                icon: Icons.add_a_photo_outlined,
-                variant: AppButtonVariant.outline,
-                onPressed: () => _handleReportAction('Eksik Görsel Bildir'),
-              ),
-            ],
-          ),
-        ),
-      ),
+    return AppSectorEmblem(
+      sector: widget.product.sector,
+      category: widget.product.category,
+      productName: widget.product.name,
+      height: 200,
+      onReportAction: () => _handleReportAction('Eksik Görsel Bildir'),
     );
   }
 

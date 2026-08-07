@@ -4,7 +4,7 @@ import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_spacing.dart';
 import '../../../features/product/models/product_model.dart';
 import '../../../shared/widgets/app_card.dart';
-import '../../../shared/widgets/app_icon_box.dart';
+import '../../../shared/widgets/app_sector_emblem.dart';
 
 class ListProductCard extends StatelessWidget {
   final ProductModel product;
@@ -19,15 +19,37 @@ class ListProductCard extends StatelessWidget {
     final category = product.category;
     final price = product.price;
 
+    final hasImage = product.imageUrl != null && product.imageUrl!.trim().isNotEmpty && product.imageUrl != 'bilinmiyor';
+
     return AppCard(
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const AppIconBox(
-            icon: Icons.inventory_2,
-            color: AppColors.primary,
-            backgroundColor: Color(0x1F0055C7),
-          ),
+          if (hasImage)
+            ClipRRect(
+              borderRadius: BorderRadius.circular(8),
+              child: Image.network(
+                product.imageUrl!,
+                width: 44,
+                height: 44,
+                fit: BoxFit.cover,
+                errorBuilder: (_, __, ___) => AppSectorEmblem(
+                  sector: product.sector,
+                  category: category,
+                  productName: title,
+                  height: 44,
+                  style: SectorEmblemStyle.compactSquare,
+                ),
+              ),
+            )
+          else
+            AppSectorEmblem(
+              sector: product.sector,
+              category: category,
+              productName: title,
+              height: 44,
+              style: SectorEmblemStyle.compactSquare,
+            ),
           const SizedBox(width: AppSpacing.md),
           Expanded(
             child: Column(

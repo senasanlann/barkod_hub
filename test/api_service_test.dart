@@ -104,6 +104,22 @@ void main() {
       expect(product.category, 'Süt');
     });
 
+    test('step 1b: fetches OFF image when CSV product has missing image', () async {
+      final service = ApiService(
+        useMockData: false,
+        client: _FakeApiClient({
+          'product': {
+            'image_url': 'https://images.openfoodfacts.org/off_image.jpg',
+          },
+        }),
+      );
+
+      final product = await service.getProductByBarcode('8690637000010');
+
+      expect(product.name, 'Ariel Sıvı Deterjan 3L');
+      expect(product.imageUrl, 'https://images.openfoodfacts.org/off_image.jpg');
+    });
+
     test('step 2: queries OFF API when barcode is not in CSV and parses product with status 1', () async {
       final service = ApiService(
         useMockData: false,

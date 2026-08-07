@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:mobile_scanner/mobile_scanner.dart';
 
+import 'package:permission_handler/permission_handler.dart';
+
 import '../../core/di/service_locator.dart';
 import '../../core/network/api_exception.dart';
 import '../../core/routes/app_routes.dart';
@@ -267,6 +269,19 @@ class _BarcodeScreenState extends State<BarcodeScreen> {
                                     style: TextStyle(color: Colors.white70),
                                   ),
                                   const SizedBox(height: AppSpacing.md),
+                                  AppButton(
+                                    text: 'Kamera İzni Ver / Ayarlar',
+                                    icon: Icons.security,
+                                    onPressed: () async {
+                                      final status = await Permission.camera.request();
+                                      if (status.isPermanentlyDenied) {
+                                        await openAppSettings();
+                                      } else {
+                                        _restartScanner();
+                                      }
+                                    },
+                                  ),
+                                  const SizedBox(height: AppSpacing.sm),
                                   AppButton(
                                     text: 'Manuel Girişe Git',
                                     icon: Icons.edit,
